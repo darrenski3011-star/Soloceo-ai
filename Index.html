@@ -1,18 +1,128 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soloco AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soloco AI</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+}
+
+header {
+  padding: 25px;
+  text-align: center;
+  background: #111827;
+}
+
+h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 25px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 15px;
+}
+
+input, textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background: #38bdf8;
+  color: #082f49;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+#result {
+  margin-top: 20px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+</style>
 </head>
+
 <body>
+
+<header>
   <h1>Soloco AI</h1>
-  <h2>Your AI-Powered Business</h2>
+  <p>Your AI Business Builder</p>
+</header>
 
-  <p>
-    Start your own online business with AI doing the heavy lifting.
-  </p>
+<div class="container">
 
-  <button>Get Started</button>
+  <div class="card">
+    <h2>Build Your Business</h2>
+
+    <p>Tell Soloco what kind of business you want to create.</p>
+
+    <textarea id="idea" rows="5"
+      placeholder="Example: I want an online business that helps local businesses get more customers."></textarea>
+
+    <button onclick="buildBusiness()">
+      Build My Business
+    </button>
+
+    <div id="result"></div>
+  </div>
+
+</div>
+
+<script>
+
+function buildBusiness() {
+
+  const idea = document.getElementById("idea").value;
+  const result = document.getElementById("result");
+
+  if (!idea.trim()) {
+    result.innerHTML = "Enter a business idea first.";
+    return;
+  }
+
+  result.innerHTML =
+  "Analyzing your idea...\\n\\n" +
+  "Soloco AI will eventually generate:\\n" +
+  "• Business concept\\n" +
+  "• Business name\\n" +
+  "• Target customers\\n" +
+  "• Offer\\n" +
+  "• Marketing plan\\n" +
+  "• Website copy\\n" +
+  "• Customer acquisition strategy\\n\\n" +
+  "Your idea:\\n" + idea;
+}
+
+</script>
+
 </body>
 </html>
