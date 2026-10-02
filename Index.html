@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +6,10 @@
 <title>Soloco AI</title>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -15,14 +18,19 @@ body {
 }
 
 header {
-  padding: 25px;
   text-align: center;
+  padding: 40px 20px;
   background: #111827;
 }
 
-h1 {
+header h1 {
+  font-size: 42px;
   margin: 0;
-  font-size: 34px;
+}
+
+header p {
+  color: #94a3b8;
+  font-size: 18px;
 }
 
 .container {
@@ -34,39 +42,35 @@ h1 {
 .card {
   background: #1e293b;
   padding: 25px;
-  margin: 20px 0;
-  border-radius: 15px;
+  margin-top: 25px;
+  border-radius: 16px;
 }
 
-input, textarea {
+textarea {
   width: 100%;
-  box-sizing: border-box;
   padding: 15px;
-  margin: 10px 0;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   font-size: 16px;
+  margin: 15px 0;
+  min-height: 130px;
 }
 
 button {
   width: 100%;
-  padding: 15px;
+  padding: 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #38bdf8;
   color: #082f49;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: bold;
 }
 
-button:hover {
-  cursor: pointer;
-}
-
 #result {
-  margin-top: 20px;
+  margin-top: 25px;
+  line-height: 1.7;
   white-space: pre-wrap;
-  line-height: 1.6;
 }
 </style>
 </head>
@@ -75,7 +79,7 @@ button:hover {
 
 <header>
   <h1>Soloco AI</h1>
-  <p>Your AI Business Builder</p>
+  <p>Your AI-powered business builder</p>
 </header>
 
 <div class="container">
@@ -83,10 +87,13 @@ button:hover {
   <div class="card">
     <h2>Build Your Business</h2>
 
-    <p>Tell Soloco what kind of business you want to create.</p>
+    <p>
+      Tell us what kind of business you want to create.
+      Soloco AI will help turn the idea into a business plan.
+    </p>
 
-    <textarea id="idea" rows="5"
-      placeholder="Example: I want an online business that helps local businesses get more customers."></textarea>
+    <textarea id="idea"
+      placeholder="Example: I want to start a business helping local contractors get more customers..."></textarea>
 
     <button onclick="buildBusiness()">
       Build My Business
@@ -105,21 +112,31 @@ function buildBusiness() {
   const result = document.getElementById("result");
 
   if (!idea.trim()) {
-    result.innerHTML = "Enter a business idea first.";
+    result.innerText = "Enter your business idea first.";
     return;
   }
 
-  result.innerHTML =
-  "Analyzing your idea...\\n\\n" +
-  "Soloco AI will eventually generate:\\n" +
-  "• Business concept\\n" +
-  "• Business name\\n" +
-  "• Target customers\\n" +
-  "• Offer\\n" +
-  "• Marketing plan\\n" +
-  "• Website copy\\n" +
-  "• Customer acquisition strategy\\n\\n" +
-  "Your idea:\\n" + idea;
+  result.innerText =
+`SOLОCO AI BUSINESS BLUEPRINT
+
+Your idea:
+${idea}
+
+BUSINESS CONCEPT
+We are turning your idea into a real business.
+
+TARGET CUSTOMER
+People who need the problem solved.
+
+OFFER
+A simple service designed around the customer's problem.
+
+MARKETING
+Use social media, local outreach and online content to find customers.
+
+NEXT STEP
+Connect Soloco AI to an AI engine so it can automatically generate a complete business plan.`;
+
 }
 
 </script>
