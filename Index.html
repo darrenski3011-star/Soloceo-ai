@@ -3,74 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Soloco AI</title>
+<title>Soloco AI | Your Business. Automated.</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#07111f;
+color:white;
+line-height:1.6;
 }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: white;
+header{
+padding:22px 7%;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:1px solid #1d3047;
 }
 
-header {
-  text-align: center;
-  padding: 40px 20px;
-  background: #111827;
+.logo{
+font-size:25px;
+font-weight:bold;
+color:#65d9ff;
 }
 
-header h1 {
-  font-size: 42px;
-  margin: 0;
+nav a{
+color:#b8c7d9;
+text-decoration:none;
+margin-left:20px;
 }
 
-header p {
-  color: #94a3b8;
-  font-size: 18px;
+.hero{
+text-align:center;
+padding:90px 20px 70px;
+background:radial-gradient(circle at top,#123b5c,#07111f 60%);
 }
 
-.container {
-  max-width: 700px;
-  margin: auto;
-  padding: 25px;
+.hero h1{
+font-size:clamp(42px,9vw,76px);
+margin:0 auto 20px;
+max-width:900px;
 }
 
-.card {
-  background: #1e293b;
-  padding: 25px;
-  margin-top: 25px;
-  border-radius: 16px;
+.hero h1 span{
+color:#65d9ff;
 }
 
-textarea {
-  width: 100%;
-  padding: 15px;
-  border-radius: 10px;
-  border: none;
-  font-size: 16px;
-  margin: 15px 0;
-  min-height: 130px;
+.hero p{
+font-size:20px;
+color:#b8c7d9;
+max-width:680px;
+margin:0 auto 35px;
 }
 
-button {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: 10px;
-  background: #38bdf8;
-  color: #082f49;
-  font-size: 18px;
-  font-weight: bold;
+.button{
+display:inline-block;
+padding:16px 28px;
+background:#65d9ff;
+color:#06101c;
+font-weight:bold;
+border-radius:10px;
+text-decoration:none;
+border:0;
+font-size:17px;
+cursor:pointer;
 }
 
-#result {
-  margin-top: 25px;
-  line-height: 1.7;
-  white-space: pre-wrap;
+.section{
+padding:70px 7%;
+text-align:center;
+}
+
+.section h2{
+font-size:38px;
+margin-bottom:15px;
+}
+
+.section>p{
+color:#aebed0;
+max-width:650px;
+margin:0 auto 40px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+max-width:1000px;
+margin:auto;
+}
+
+.card{
+background:#0d1c2e;
+border:1px solid #20364e;
+padding:28px;
+border-radius:16px;
+text-align:left;
+}
+
+.card h3{
+color:#65d9ff;
+}
+
+.card p{
+color:#aebed0;
+}
+
+.cta{
+background:#0d1c2e;
+margin:30px 7% 70px;
+padding:50px 25px;
+border-radius:20px;
+text-align:center;
+border:1px solid #20364e;
+}
+
+input{
+width:min(500px,90%);
+padding:16px;
+border-radius:9px;
+border:1px solid #38516b;
+background:#07111f;
+color:white;
+margin:10px;
+font-size:16px;
+}
+
+#message{
+margin-top:20px;
+color:#65d9ff;
+font-weight:bold;
+}
+
+footer{
+text-align:center;
+padding:30px;
+color:#71849a;
+border-top:1px solid #1d3047;
 }
 </style>
 </head>
@@ -78,67 +150,92 @@ button {
 <body>
 
 <header>
-  <h1>Soloco AI</h1>
-  <p>Your AI-powered business builder</p>
+<div class="logo">Soloco AI</div>
+<nav>
+<a href="#how">How It Works</a>
+<a href="#start">Start</a>
+</nav>
 </header>
 
-<div class="container">
+<section class="hero">
+<h1>Build Your Business.<br><span>Let AI Run It.</span></h1>
 
-  <div class="card">
-    <h2>Build Your Business</h2>
+<p>
+Soloco AI helps ordinary people create, launch and automate online businesses without needing to become technology experts.
+</p>
 
-    <p>
-      Tell us what kind of business you want to create.
-      Soloco AI will help turn the idea into a business plan.
-    </p>
+<a class="button" href="#start">Build My Business</a>
+</section>
 
-    <textarea id="idea"
-      placeholder="Example: I want to start a business helping local contractors get more customers..."></textarea>
+<section class="section" id="how">
+<h2>One AI Business Command Center</h2>
 
-    <button onclick="buildBusiness()">
-      Build My Business
-    </button>
+<p>
+Instead of juggling ten different tools, Soloco AI is designed to put the work in one place.
+</p>
 
-    <div id="result"></div>
-  </div>
+<div class="cards">
 
+<div class="card">
+<h3>💡 Find Opportunities</h3>
+<p>Discover business ideas, services and products people are actually looking for.</p>
 </div>
 
+<div class="card">
+<h3>🚀 Launch</h3>
+<p>Create your business website, offers and marketing materials faster with AI.</p>
+</div>
+
+<div class="card">
+<h3>📣 Marketing</h3>
+<p>Generate advertisements, social posts and promotional content without starting from scratch.</p>
+</div>
+
+<div class="card">
+<h3>⚙️ Automate</h3>
+<p>Build repeatable systems so your business can handle more of the routine work automatically.</p>
+</div>
+
+</div>
+</section>
+
+<section class="cta" id="start">
+
+<h2>Start Building</h2>
+
+<p>
+Tell Soloco AI where you want to go.
+</p>
+
+<input id="idea" placeholder="Example: I want a business that makes money online">
+
+<br>
+
+<button class="button" onclick="startBusiness()">
+Create My Business Plan
+</button>
+
+<div id="message"></div>
+
+</section>
+
+<footer>
+© 2026 Soloco AI. Build smarter. Work less.
+</footer>
+
 <script>
+function startBusiness(){
 
-function buildBusiness() {
+const idea=document.getElementById("idea").value;
+const message=document.getElementById("message");
 
-  const idea = document.getElementById("idea").value;
-  const result = document.getElementById("result");
-
-  if (!idea.trim()) {
-    result.innerText = "Enter your business idea first.";
-    return;
-  }
-
-  result.innerText =
-`SOLОCO AI BUSINESS BLUEPRINT
-
-Your idea:
-${idea}
-
-BUSINESS CONCEPT
-We are turning your idea into a real business.
-
-TARGET CUSTOMER
-People who need the problem solved.
-
-OFFER
-A simple service designed around the customer's problem.
-
-MARKETING
-Use social media, local outreach and online content to find customers.
-
-NEXT STEP
-Connect Soloco AI to an AI engine so it can automatically generate a complete business plan.`;
-
+if(!idea){
+message.innerText="Tell us what kind of business you want to build first.";
+return;
 }
 
+message.innerText="Your Soloco AI business plan is being prepared...";
+}
 </script>
 
 </body>
