@@ -8,6 +8,8 @@
 <style>
 *{box-sizing:border-box}
 
+html{scroll-behavior:smooth}
+
 body{
   margin:0;
   font-family:Arial,sans-serif;
@@ -40,6 +42,8 @@ nav a{
   margin-left:22px;
 }
 
+nav a:hover{color:#55d6ff}
+
 .hero{
   text-align:center;
   padding:90px 20px 70px;
@@ -53,9 +57,7 @@ nav a{
   max-width:800px;
 }
 
-.hero h1 span{
-  color:#55d6ff;
-}
+.hero h1 span{color:#55d6ff}
 
 .hero p{
   max-width:700px;
@@ -65,6 +67,7 @@ nav a{
 }
 
 .btn{
+  display:inline-block;
   border:0;
   border-radius:12px;
   padding:17px 28px;
@@ -73,7 +76,15 @@ nav a{
   font-size:18px;
   font-weight:bold;
   cursor:pointer;
+  transition:transform .15s ease,opacity .15s ease;
 }
+
+.btn:hover{
+  transform:translateY(-2px);
+  opacity:.92;
+}
+
+.btn:active{transform:translateY(0)}
 
 .section{
   max-width:1000px;
@@ -133,9 +144,19 @@ input,select,textarea{
   font-size:16px;
 }
 
+input:focus,select:focus,textarea:focus{
+  outline:2px solid #55d6ff;
+  border-color:#55d6ff;
+}
+
 textarea{
   min-height:110px;
   resize:vertical;
+}
+
+.generate-btn{
+  width:100%;
+  margin-top:8px;
 }
 
 .result{
@@ -147,12 +168,22 @@ textarea{
   border:1px solid #55d6ff;
 }
 
-.result h3{
+.result.visible{display:block}
+
+.result h2{
   color:#55d6ff;
+  margin-top:0;
+  font-size:30px;
 }
 
-.result li{
-  margin-bottom:10px;
+.result h3{color:#55d6ff}
+
+.result li{margin-bottom:10px}
+
+.notice{
+  color:#aebdb6;
+  font-size:14px;
+  margin-top:18px;
 }
 
 footer{
@@ -187,9 +218,7 @@ footer{
     Tell Soloco AI what you want to build and get a practical
     business blueprint, marketing plan and first steps.
   </p>
-  <a href="#builder">
-    <button class="btn">Build My Business</button>
-  </a>
+  <a href="#builder" class="btn">Build My Business</a>
 </section>
 
 <section class="section" id="how">
@@ -220,13 +249,13 @@ footer{
 
   <div class="builder">
 
-    <label>What kind of business do you want?</label>
-    <input id="business" placeholder="Example: online fishing business">
+    <label for="business">What kind of business do you want?</label>
+    <input id="business" type="text" placeholder="Example: online fishing business">
 
-    <label>What are you good at?</label>
-    <input id="skills" placeholder="Example: fishing, woodworking, sales">
+    <label for="skills">What are you good at?</label>
+    <input id="skills" type="text" placeholder="Example: fishing, woodworking, sales">
 
-    <label>How much can you spend to start?</label>
+    <label for="budget">How much can you spend to start?</label>
     <select id="budget">
       <option value="0">$0 or almost nothing</option>
       <option value="100">Under $100</option>
@@ -235,7 +264,7 @@ footer{
       <option value="5000">$1,000+</option>
     </select>
 
-    <label>What is your main goal?</label>
+    <label for="goal">What is your main goal?</label>
     <select id="goal">
       <option>Make money quickly</option>
       <option>Build long-term income</option>
@@ -243,13 +272,15 @@ footer{
       <option>Create a side business</option>
     </select>
 
-    <br><br>
+    <br>
 
-    <button class="btn" onclick="buildBusiness()">
+    <button type="button" class="btn generate-btn" id="generateButton">
       Generate My Business Plan
     </button>
 
-    <div class="result" id="result"></div>
+    <p class="notice">Your blueprint is generated instantly in your browser. No account or paid AI API is required for this version.</p>
+
+    <div class="result" id="result" aria-live="polite"></div>
 
   </div>
 </section>
@@ -259,98 +290,123 @@ footer{
 </footer>
 
 <script>
-function buildBusiness() {
-    const business = document.getElementById("business").value;
-    const skills = document.getElementById("skills").value;
-    const budget = document.getElementById("budget").value;
-    const goal = document.getElementById("goal").value;
-
-    const result = document.getElementById("result");
-
-    if (!business || !skills) {
-        result.innerHTML = `
-            <h2>Tell us a little more.</h2>
-            <p>Enter the type of business you want and what you're good at.</p>
-        `;
-        return;
-    }
-
-    result.innerHTML = `
-        <h2>Your Soloco AI Business Blueprint</h2>
-
-        <p><strong>Business:</strong> ${business}</p>
-        <p><strong>Your strengths:</strong> ${skills}</p>
-        <p><strong>Starting budget:</strong> ${budget}</p>
-        <p><strong>Main goal:</strong> ${goal}</p>
-
-        <h3>Your Business Strategy</h3>
-
-        <p>
-        Soloco AI recommends starting with a lean business that uses
-        artificial intelligence to handle research, content creation,
-        marketing, customer communication and repetitive tasks.
-        Your goal is to get customers before spending money on unnecessary
-        tools or services.
-        </p>
-
-        <h3>Your First 3 Steps</h3>
-
-        <ol>
-            <li>Define exactly what you will sell.</li>
-            <li>Create a simple online offer.</li>
-            <li>Find your first potential customers.</li>
-        </ol>
-
-        <h3>Money Strategy</h3>
-
-        <p>
-        Start with free tools whenever possible. Reinvest your first
-        revenue into the parts of the business that save you the most time.
-        </p>
-
-        <h3>Soloco AI Recommendation</h3>
-
-        <p>
-        Build the business around your existing skills while letting AI
-        handle as much of the repetitive work as possible.
-        </p>
-    `;
+function escapeHTML(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
-</script>("result");
 
-  if(!business){
-    alert("Tell us what kind of business you want to build.");
+function buildBusiness() {
+  const business = document.getElementById("business").value.trim();
+  const skills = document.getElementById("skills").value.trim();
+  const budget = document.getElementById("budget").value;
+  const budgetText = document.getElementById("budget").options[
+    document.getElementById("budget").selectedIndex
+  ].text;
+  const goal = document.getElementById("goal").value;
+  const result = document.getElementById("result");
+
+  if (!business || !skills) {
+    result.innerHTML = `
+      <h2>We need two things first.</h2>
+      <p>Enter the kind of business you want and what you're good at.</p>
+    `;
+    result.classList.add("visible");
+    result.scrollIntoView({behavior:"smooth", block:"nearest"});
     return;
   }
 
-  let startup;
+  let startupPlan;
 
-  if(budget === "0"){
-    startup =
-      "Start with free tools, direct outreach and organic social media. Avoid paid advertising until you have proof people will buy.";
-  }else if(budget === "100"){
-    startup =
-      "Use your small budget for a domain, basic branding or the one tool that directly helps you get customers.";
-  }else if(budget === "500"){
-    startup =
-      "Build a simple professional presence and reserve most of the budget for customer acquisition.";
-  }else{
-    startup =
-      "Create a stronger brand, test multiple customer-acquisition channels and track which one produces paying customers.";
+  if (budget === "0") {
+    startupPlan = "Use free tools, direct outreach and organic social media. Do not spend money on advertising until you have proof that people will pay.";
+  } else if (budget === "100") {
+    startupPlan = "Keep the setup lean. Spend only on something that directly helps you get customers, such as a domain, simple branding or a useful tool.";
+  } else if (budget === "500") {
+    startupPlan = "Build a professional basic presence, but keep most of the budget available for customer acquisition and testing.";
+  } else {
+    startupPlan = "Use the larger budget carefully. Test multiple customer-acquisition channels and track which ones actually produce paying customers.";
   }
 
-  const skillText =
-    skills || "your existing skills and interests";
+  const safeBusiness = escapeHTML(business);
+  const safeSkills = escapeHTML(skills);
+  const safeGoal = escapeHTML(goal);
 
   result.innerHTML = `
-    <h3>🚀 Your Soloco AI Blueprint</h3>
+    <h2>🚀 Your Soloco AI Business Blueprint</h2>
 
-    <p><strong>Business:</strong> ${business}</p>
+    <p><strong>Business idea:</strong> ${safeBusiness}</p>
+    <p><strong>Your strengths:</strong> ${safeSkills}</p>
+    <p><strong>Starting budget:</strong> ${escapeHTML(budgetText)}</p>
+    <p><strong>Main goal:</strong> ${safeGoal}</p>
 
-    <p><strong>Goal:</strong> ${goal}</p>
-
-    <h3>1. Your Business Concept</h3>
+    <h3>1. Business Concept</h3>
     <p>
-      Build a business around <strong>${business}</strong>,
-      using ${skillText} as your starting advantage.
-      Focus on solving
+      Build a lean business around <strong>${safeBusiness}</strong>,
+      using your strengths in <strong>${safeSkills}</strong> as the human
+      advantage. Let AI handle research, writing, organization,
+      repetitive tasks and basic marketing work wherever practical.
+    </p>
+
+    <h3>2. What You Should Sell</h3>
+    <p>
+      Start with one simple offer that solves one clear problem for one
+      specific type of customer. Make the offer easy to understand and
+      easy to buy.
+    </p>
+
+    <h3>3. Startup Strategy</h3>
+    <p>${startupPlan}</p>
+
+    <h3>4. First 3 Actions</h3>
+    <ol>
+      <li>Define one specific customer and one problem you can solve.</li>
+      <li>Create a simple offer and a basic online page explaining it.</li>
+      <li>Contact potential customers directly and try to make the first sale before adding unnecessary complexity.</li>
+    </ol>
+
+    <h3>5. How AI Helps</h3>
+    <ul>
+      <li>Research customers and competitors.</li>
+      <li>Write website copy, advertisements and social posts.</li>
+      <li>Create sales scripts and follow-up messages.</li>
+      <li>Organize leads and repetitive administrative work.</li>
+      <li>Turn customer feedback into improved offers.</li>
+    </ul>
+
+    <h3>6. Your 30-Day Target</h3>
+    <p>
+      Focus on getting the first paying customer. After that, improve the
+      offer, document what works and automate the repetitive parts.
+      Revenue comes before fancy software. Humanity has suffered enough
+      from dashboards nobody uses.
+    </p>
+
+    <h3>Soloco AI Recommendation</h3>
+    <p>
+      Because your goal is <strong>${safeGoal}</strong>, keep the business
+      simple at first. Spend your time on customers and sales while AI
+      handles as much of the technical and repetitive work as possible.
+    </p>
+  `;
+
+  result.classList.add("visible");
+  result.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+document.getElementById("generateButton").addEventListener("click", buildBusiness);
+
+document.getElementById("business").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") buildBusiness();
+});
+
+document.getElementById("skills").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") buildBusiness();
+});
+</script>
+
+</body>
+</html>
