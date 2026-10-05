@@ -259,22 +259,64 @@ footer{
 </footer>
 
 <script>
-function buildBusiness(){
+function buildBusiness() {
+    const business = document.getElementById("business").value;
+    const skills = document.getElementById("skills").value;
+    const budget = document.getElementById("budget").value;
+    const goal = document.getElementById("goal").value;
 
-  const business =
-    document.getElementById("business").value.trim();
+    const result = document.getElementById("result");
 
-  const skills =
-    document.getElementById("skills").value.trim();
+    if (!business || !skills) {
+        result.innerHTML = `
+            <h2>Tell us a little more.</h2>
+            <p>Enter the type of business you want and what you're good at.</p>
+        `;
+        return;
+    }
 
-  const budget =
-    document.getElementById("budget").value;
+    result.innerHTML = `
+        <h2>Your Soloco AI Business Blueprint</h2>
 
-  const goal =
-    document.getElementById("goal").value;
+        <p><strong>Business:</strong> ${business}</p>
+        <p><strong>Your strengths:</strong> ${skills}</p>
+        <p><strong>Starting budget:</strong> ${budget}</p>
+        <p><strong>Main goal:</strong> ${goal}</p>
 
-  const result =
-    document.getElementById("result");
+        <h3>Your Business Strategy</h3>
+
+        <p>
+        Soloco AI recommends starting with a lean business that uses
+        artificial intelligence to handle research, content creation,
+        marketing, customer communication and repetitive tasks.
+        Your goal is to get customers before spending money on unnecessary
+        tools or services.
+        </p>
+
+        <h3>Your First 3 Steps</h3>
+
+        <ol>
+            <li>Define exactly what you will sell.</li>
+            <li>Create a simple online offer.</li>
+            <li>Find your first potential customers.</li>
+        </ol>
+
+        <h3>Money Strategy</h3>
+
+        <p>
+        Start with free tools whenever possible. Reinvest your first
+        revenue into the parts of the business that save you the most time.
+        </p>
+
+        <h3>Soloco AI Recommendation</h3>
+
+        <p>
+        Build the business around your existing skills while letting AI
+        handle as much of the repetitive work as possible.
+        </p>
+    `;
+}
+</script>("result");
 
   if(!business){
     alert("Tell us what kind of business you want to build.");
