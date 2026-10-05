@@ -3,147 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Soloco AI | Your Business. Automated.</title>
+<title>Soloco AI | Build Your Business</title>
 
 <style>
 *{box-sizing:border-box}
 
 body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#031b0a;
-color:white;
-line-height:1.6;
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#031b0a;
+  color:#fff;
+  line-height:1.6;
 }
 
 header{
-padding:22px 7%;
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:#031b0a;
-border-bottom:1px solid #145c2a;
+  padding:20px 6%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#031b0a;
+  border-bottom:1px solid #145c2a;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 
 .logo{
-font-size:25px;
-font-weight:bold;
-color:#39ff14;
+  font-size:26px;
+  font-weight:bold;
+  color:#39ff14;
 }
 
 nav a{
-color:#b8c7d9;
-text-decoration:none;
-margin-left:20px;
+  color:#c9d6d0;
+  text-decoration:none;
+  margin-left:22px;
 }
 
 .hero{
-text-align:center;
-padding:90px 20px 70px;
-background:
-radial-gradient(circle at 50% 0%,#0b6b25 0%,#031b09 50%,#020804 100%);
+  text-align:center;
+  padding:90px 20px 70px;
+  background:radial-gradient(circle at top,#096b2a,#031b0a 65%);
 }
 
 .hero h1{
-font-size:clamp(42px,9vw,76px);
-margin:0 auto 20px;
-max-width:900px;
+  font-size:clamp(42px,9vw,72px);
+  line-height:1.05;
+  margin:0 auto 25px;
+  max-width:800px;
 }
 
 .hero h1 span{
-color:#65d9ff;
+  color:#55d6ff;
 }
 
 .hero p{
-font-size:20px;
-color:#b8c7d9;
-max-width:680px;
-margin:0 auto 35px;
+  max-width:700px;
+  margin:0 auto 35px;
+  color:#c9d6d0;
+  font-size:20px;
 }
 
-.button{
-display:inline-block;
-padding:16px 28px;
-background:#65d9ff;
-color:#06101c;
-font-weight:bold;
-border-radius:10px;
-text-decoration:none;
-border:0;
-font-size:17px;
-cursor:pointer;
+.btn{
+  border:0;
+  border-radius:12px;
+  padding:17px 28px;
+  background:#55d6ff;
+  color:#06151b;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 .section{
-padding:70px 7%;
-text-align:center;
+  max-width:1000px;
+  margin:auto;
+  padding:70px 20px;
 }
 
 .section h2{
-font-size:38px;
-margin-bottom:15px;
+  font-size:38px;
+  margin-bottom:10px;
 }
 
-.section>p{
-color:#aebed0;
-max-width:650px;
-margin:0 auto 40px;
+.sub{
+  color:#aebdb6;
+  margin-bottom:35px;
 }
 
 .cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-max-width:1000px;
-margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
 }
 
 .card{
-background:#0d1c2e;
-border:1px solid #20364e;
-padding:28px;
-border-radius:16px;
-text-align:left;
+  background:#0d1c2d;
+  border:1px solid #16415b;
+  border-radius:20px;
+  padding:28px;
 }
 
 .card h3{
-color:#39ff14;
-
-.card p{
-color:#aebed0;
+  color:#39ff14;
+  margin-top:0;
+  font-size:23px;
 }
 
-.cta{
-background:#0d1c2e;
-margin:30px 7% 70px;
-padding:50px 25px;
-border-radius:20px;
-text-align:center;
-border:1px solid #20364e;
+.builder{
+  background:#081f12;
+  border:1px solid #145c2a;
+  border-radius:24px;
+  padding:30px;
 }
 
-input{
-width:min(500px,90%);
-padding:16px;
-border-radius:9px;
-border:1px solid #38516b;
-background:#07111f;
-color:white;
-margin:10px;
-font-size:16px;
+label{
+  display:block;
+  margin:18px 0 8px;
+  font-weight:bold;
 }
 
-#message{
-margin-top:20px;
-color:#39ff14;
-font-weight:bold;
+input,select,textarea{
+  width:100%;
+  padding:15px;
+  border-radius:10px;
+  border:1px solid #315044;
+  background:#07140c;
+  color:white;
+  font-size:16px;
+}
+
+textarea{
+  min-height:110px;
+  resize:vertical;
+}
+
+.result{
+  display:none;
+  margin-top:30px;
+  padding:25px;
+  border-radius:18px;
+  background:#0d1c2d;
+  border:1px solid #55d6ff;
+}
+
+.result h3{
+  color:#55d6ff;
+}
+
+.result li{
+  margin-bottom:10px;
 }
 
 footer{
-text-align:center;
-padding:30px;
-color:#71849a;
-border-top:1px solid #1d3047;
+  text-align:center;
+  padding:35px 20px;
+  border-top:1px solid #145c2a;
+  color:#8fa49a;
+}
+
+@media(max-width:600px){
+  header{padding:18px}
+  nav a{margin-left:10px;font-size:14px}
+  .hero{padding-top:65px}
+  .builder{padding:20px}
 }
 </style>
 </head>
@@ -151,115 +174,141 @@ border-top:1px solid #1d3047;
 <body>
 
 <header>
-<div class="logo">Soloco AI</div>
-<nav>
-<a href="#how">How It Works</a>
-<a href="#start">Start</a>
-</nav>
+  <div class="logo">Soloco AI</div>
+  <nav>
+    <a href="#how">How It Works</a>
+    <a href="#builder">Start</a>
+  </nav>
 </header>
 
 <section class="hero">
-<h1>Build Your Business.<br><span>Let AI Run It.</span></h1>
-
-<p>
-Soloco AI helps ordinary people create, launch and automate online businesses without needing to become technology experts.
-</p>
-
-<a class="button" href="#start">Build My Business</a>
+  <h1>Build Your Business.<br><span>Let AI Run It.</span></h1>
+  <p>
+    Tell Soloco AI what you want to build and get a practical
+    business blueprint, marketing plan and first steps.
+  </p>
+  <a href="#builder">
+    <button class="btn">Build My Business</button>
+  </a>
 </section>
 
 <section class="section" id="how">
-<h2>One AI Business Command Center</h2>
+  <h2>What Soloco AI Does</h2>
+  <p class="sub">Turn an idea into a plan without drowning in technology nonsense.</p>
 
-<p>
-Instead of juggling ten different tools, Soloco AI is designed to put the work in one place.
-</p>
+  <div class="cards">
+    <div class="card">
+      <h3>💡 Create</h3>
+      <p>Turn your skills, interests and ideas into possible businesses.</p>
+    </div>
 
-<div class="cards">
+    <div class="card">
+      <h3>📣 Marketing</h3>
+      <p>Generate advertising ideas, social posts and promotional content.</p>
+    </div>
 
-<div class="card">
-<h3>💡 Find Opportunities</h3>
-<p>Discover business ideas, services and products people are actually looking for.</p>
-</div>
-
-<div class="card">
-<h3>🚀 Launch</h3>
-<p>Create your business website, offers and marketing materials faster with AI.</p>
-</div>
-
-<div class="card">
-<h3>📣 Marketing</h3>
-<p>Generate advertisements, social posts and promotional content without starting from scratch.</p>
-</div>
-
-<div class="card">
-<h3>⚙️ Automate</h3>
-<p>Build repeatable systems so your business can handle more of the routine work automatically.</p>
-</div>
-
-</div>
+    <div class="card">
+      <h3>⚙️ Automate</h3>
+      <p>Find repetitive work that can eventually be handled by automation.</p>
+    </div>
+  </div>
 </section>
 
-<section class="cta" id="start">
+<section class="section" id="builder">
+  <h2>Start Building</h2>
+  <p class="sub">Give Soloco AI a little information. It will build your starting blueprint.</p>
 
-<h2>Start Building</h2>
+  <div class="builder">
 
-<p>
-Tell Soloco AI where you want to go.
-</p>
+    <label>What kind of business do you want?</label>
+    <input id="business" placeholder="Example: online fishing business">
 
-<input id="idea" placeholder="Example: I want a business that makes money online">
+    <label>What are you good at?</label>
+    <input id="skills" placeholder="Example: fishing, woodworking, sales">
 
-<br>
+    <label>How much can you spend to start?</label>
+    <select id="budget">
+      <option value="0">$0 or almost nothing</option>
+      <option value="100">Under $100</option>
+      <option value="500">$100 - $500</option>
+      <option value="1000">$500 - $1,000</option>
+      <option value="5000">$1,000+</option>
+    </select>
 
-<button onclick="startBusiness()">Build My Business</button>
+    <label>What is your main goal?</label>
+    <select id="goal">
+      <option>Make money quickly</option>
+      <option>Build long-term income</option>
+      <option>Replace my job</option>
+      <option>Create a side business</option>
+    </select>
 
-<div id="message"></div>
+    <br><br>
 
+    <button class="btn" onclick="buildBusiness()">
+      Generate My Business Plan
+    </button>
+
+    <div class="result" id="result"></div>
+
+  </div>
 </section>
 
 <footer>
-© 2026 Soloco AI. Build smarter. Work less.
+  © 2026 Soloco AI. Build smarter. Work less.
 </footer>
 
 <script>
-function startBusiness(){
+function buildBusiness(){
 
-const idea = document.getElementById("idea").value.trim();
-const message = document.getElementById("message");
+  const business =
+    document.getElementById("business").value.trim();
 
-if(!idea){
-message.innerText =
-"Tell us what kind of business you want to build first.";
-return;
-}
+  const skills =
+    document.getElementById("skills").value.trim();
 
-message.innerHTML = `
-<h3>Your Soloco AI Business Plan</h3>
+  const budget =
+    document.getElementById("budget").value;
 
-<p><strong>Business idea:</strong> ${idea}</p>
+  const goal =
+    document.getElementById("goal").value;
 
-<p><strong>Step 1: Define the offer</strong><br>
-Create one simple product or service that solves a specific problem.</p>
+  const result =
+    document.getElementById("result");
 
-<p><strong>Step 2: Find customers</strong><br>
-Identify people who already have the problem and are willing to pay to solve it.</p>
+  if(!business){
+    alert("Tell us what kind of business you want to build.");
+    return;
+  }
 
-<p><strong>Step 3: Build the basic system</strong><br>
-Use AI to create your website, marketing, customer messages and daily workflow.</p>
+  let startup;
 
-<p><strong>Step 4: Get your first customers</strong><br>
-Start with free outreach, local businesses, social media and online communities.</p>
+  if(budget === "0"){
+    startup =
+      "Start with free tools, direct outreach and organic social media. Avoid paid advertising until you have proof people will buy.";
+  }else if(budget === "100"){
+    startup =
+      "Use your small budget for a domain, basic branding or the one tool that directly helps you get customers.";
+  }else if(budget === "500"){
+    startup =
+      "Build a simple professional presence and reserve most of the budget for customer acquisition.";
+  }else{
+    startup =
+      "Create a stronger brand, test multiple customer-acquisition channels and track which one produces paying customers.";
+  }
 
-<p><strong>Step 5: Automate</strong><br>
-Once customers start coming in, automate repetitive work so the business requires less of your time.</p>
+  const skillText =
+    skills || "your existing skills and interests";
 
-<p><strong>Soloco AI recommendation:</strong><br>
-Start small, prove that people will pay, then build the automation around what actually works.</p>
-`;
+  result.innerHTML = `
+    <h3>🚀 Your Soloco AI Blueprint</h3>
 
-}
-</script>
+    <p><strong>Business:</strong> ${business}</p>
 
-</body>
-</html>
+    <p><strong>Goal:</strong> ${goal}</p>
+
+    <h3>1. Your Business Concept</h3>
+    <p>
+      Build a business around <strong>${business}</strong>,
+      using ${skillText} as your starting advantage.
+      Focus on solving
