@@ -225,15 +225,39 @@ Tell Soloco AI where you want to go.
 <script>
 function startBusiness(){
 
-const idea=document.getElementById("idea").value;
-const message=document.getElementById("message");
+const idea = document.getElementById("idea").value.trim();
+const message = document.getElementById("message");
 
 if(!idea){
-message.innerText="Tell us what kind of business you want to build first.";
+message.innerText =
+"Tell us what kind of business you want to build first.";
 return;
 }
 
-message.innerText="Your Soloco AI business plan is being prepared...";
+message.innerHTML = `
+<h3>Your Soloco AI Business Plan</h3>
+
+<p><strong>Business idea:</strong> ${idea}</p>
+
+<p><strong>Step 1: Define the offer</strong><br>
+Create one simple product or service that solves a specific problem.</p>
+
+<p><strong>Step 2: Find customers</strong><br>
+Identify people who already have the problem and are willing to pay to solve it.</p>
+
+<p><strong>Step 3: Build the basic system</strong><br>
+Use AI to create your website, marketing, customer messages and daily workflow.</p>
+
+<p><strong>Step 4: Get your first customers</strong><br>
+Start with free outreach, local businesses, social media and online communities.</p>
+
+<p><strong>Step 5: Automate</strong><br>
+Once customers start coming in, automate repetitive work so the business requires less of your time.</p>
+
+<p><strong>Soloco AI recommendation:</strong><br>
+Start small, prove that people will pay, then build the automation around what actually works.</p>
+`;
+
 }
 </script>
 
