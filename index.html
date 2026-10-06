@@ -302,110 +302,261 @@ function escapeHTML(value) {
 function buildBusiness() {
   const business = document.getElementById("business").value.trim();
   const skills = document.getElementById("skills").value.trim();
-  const budget = document.getElementById("budget").value;
-  const budgetText = document.getElementById("budget").options[
-    document.getElementById("budget").selectedIndex
-  ].text;
+  const budgetSelect = document.getElementById("budget");
+  const budget = budgetSelect.value;
+  const budgetText = budgetSelect.options[budgetSelect.selectedIndex].text;
   const goal = document.getElementById("goal").value;
   const result = document.getElementById("result");
 
   if (!business || !skills) {
     result.innerHTML = `
       <h2>We need two things first.</h2>
-      <p>Enter the kind of business you want and what you're good at.</p>
+      <p>Tell us what business you want to build and what you're good at.</p>
     `;
     result.classList.add("visible");
     result.scrollIntoView({behavior:"smooth", block:"nearest"});
     return;
   }
 
-  let startupPlan;
-
-  if (budget === "0") {
-    startupPlan = "Use free tools, direct outreach and organic social media. Do not spend money on advertising until you have proof that people will pay.";
-  } else if (budget === "100") {
-    startupPlan = "Keep the setup lean. Spend only on something that directly helps you get customers, such as a domain, simple branding or a useful tool.";
-  } else if (budget === "500") {
-    startupPlan = "Build a professional basic presence, but keep most of the budget available for customer acquisition and testing.";
-  } else {
-    startupPlan = "Use the larger budget carefully. Test multiple customer-acquisition channels and track which ones actually produce paying customers.";
-  }
-
   const safeBusiness = escapeHTML(business);
   const safeSkills = escapeHTML(skills);
   const safeGoal = escapeHTML(goal);
+  const safeBudget = escapeHTML(budgetText);
+
+  let startupPlan = "";
+  let moneyPlan = "";
+
+  if (budget === "0") {
+    startupPlan = `
+      Start with free tools and direct customer outreach.
+      Do not spend money on advertising until someone proves they
+      will pay for the offer.
+    `;
+
+    moneyPlan = `
+      Your first target is not a huge business. It is your first
+      $100. Find one person with a problem you can solve and make
+      a simple offer.
+    `;
+  } else if (budget === "100") {
+    startupPlan = `
+      Keep most of your money untouched. Use a small amount only
+      for something that directly improves credibility or helps
+      you reach customers.
+    `;
+
+    moneyPlan = `
+      Aim for your first customer quickly, then reinvest only
+      part of the revenue into tools that save time or increase sales.
+    `;
+  } else if (budget === "500") {
+    startupPlan = `
+      Build a professional basic presence, but reserve most of
+      the budget for testing customer acquisition.
+    `;
+
+    moneyPlan = `
+      Test several ways to reach customers and track which method
+      produces actual paying customers.
+    `;
+  } else {
+    startupPlan = `
+      Use the available budget carefully. Build the basic business
+      first, test the offer and only increase spending after the
+      numbers show that customers are responding.
+    `;
+
+    moneyPlan = `
+      Use your budget to accelerate something that already works,
+      not to gamble on an untested idea.
+    `;
+  }
 
   result.innerHTML = `
     <h2>🚀 Your Soloco AI Business Blueprint</h2>
 
-    <p><strong>Business idea:</strong> ${safeBusiness}</p>
-    <p><strong>Your strengths:</strong> ${safeSkills}</p>
-    <p><strong>Starting budget:</strong> ${escapeHTML(budgetText)}</p>
-    <p><strong>Main goal:</strong> ${safeGoal}</p>
-
-    <h3>1. Business Concept</h3>
     <p>
-      Build a lean business around <strong>${safeBusiness}</strong>,
-      using your strengths in <strong>${safeSkills}</strong> as the human
-      advantage. Let AI handle research, writing, organization,
-      repetitive tasks and basic marketing work wherever practical.
+      <strong>Business idea:</strong> ${safeBusiness}
     </p>
 
-    <h3>2. What You Should Sell</h3>
     <p>
-      Start with one simple offer that solves one clear problem for one
-      specific type of customer. Make the offer easy to understand and
-      easy to buy.
+      <strong>Your strengths:</strong> ${safeSkills}
     </p>
 
-    <h3>3. Startup Strategy</h3>
+    <p>
+      <strong>Starting budget:</strong> ${safeBudget}
+    </p>
+
+    <p>
+      <strong>Main goal:</strong> ${safeGoal}
+    </p>
+
+    <h3>1. Your Business Concept</h3>
+
+    <p>
+      Build a focused business around
+      <strong>${safeBusiness}</strong>.
+      Your advantage is your knowledge of
+      <strong>${safeSkills}</strong>.
+      Use AI to handle research, writing, planning, customer
+      communication, content creation and repetitive work.
+    </p>
+
+    <h3>2. Who You Should Sell To</h3>
+
+    <p>
+      Start with one clearly defined group of people who already
+      have the problem your business can solve.
+      Do not try to sell to everybody. Everybody is usually code
+      for nobody.
+    </p>
+
+    <h3>3. Your First Offer</h3>
+
+    <p>
+      Create one simple offer with a clear result.
+      The customer should immediately understand:
+      what they get, who it is for, what problem it solves,
+      and why they should buy it now.
+    </p>
+
+    <p>
+      <strong>Simple offer formula:</strong><br>
+      I help [specific customer] get [specific result]
+      without [major frustration].
+    </p>
+
+    <h3>4. Startup Strategy</h3>
+
     <p>${startupPlan}</p>
 
-    <h3>4. First 3 Actions</h3>
+    <h3>5. How You Make Your First $100</h3>
+
     <ol>
-      <li>Define one specific customer and one problem you can solve.</li>
-      <li>Create a simple offer and a basic online page explaining it.</li>
-      <li>Contact potential customers directly and try to make the first sale before adding unnecessary complexity.</li>
+      <li>Choose one specific customer type.</li>
+      <li>Find 20 potential customers online.</li>
+      <li>Contact them with a short, personalized message.</li>
+      <li>Offer a simple solution to one problem.</li>
+      <li>Ask for the sale instead of waiting for people to discover you.</li>
+      <li>Use the first customer's feedback to improve the offer.</li>
     </ol>
 
-    <h3>5. How AI Helps</h3>
+    <h3>6. AI Workload</h3>
+
     <ul>
       <li>Research customers and competitors.</li>
-      <li>Write website copy, advertisements and social posts.</li>
-      <li>Create sales scripts and follow-up messages.</li>
-      <li>Organize leads and repetitive administrative work.</li>
-      <li>Turn customer feedback into improved offers.</li>
+      <li>Write website copy.</li>
+      <li>Create social media posts.</li>
+      <li>Generate advertising ideas.</li>
+      <li>Write sales messages.</li>
+      <li>Create customer follow-ups.</li>
+      <li>Organize ideas and leads.</li>
+      <li>Turn repetitive tasks into repeatable systems.</li>
     </ul>
 
-    <h3>6. Your 30-Day Target</h3>
+    <h3>7. Your 7-Day Launch Plan</h3>
+
+    <ol>
+      <li>
+        <strong>Day 1:</strong>
+        Define the customer, problem and offer.
+      </li>
+
+      <li>
+        <strong>Day 2:</strong>
+        Create your basic business page and sales message.
+      </li>
+
+      <li>
+        <strong>Day 3:</strong>
+        Create your first 5 pieces of promotional content.
+      </li>
+
+      <li>
+        <strong>Day 4:</strong>
+        Find at least 20 potential customers.
+      </li>
+
+      <li>
+        <strong>Day 5:</strong>
+        Contact potential customers directly.
+      </li>
+
+      <li>
+        <strong>Day 6:</strong>
+        Follow up and improve the offer based on responses.
+      </li>
+
+      <li>
+        <strong>Day 7:</strong>
+        Review what worked and repeat the best-performing activity.
+      </li>
+    </ol>
+
+    <h3>8. Free-First Tool Strategy</h3>
+
+    <ul>
+      <li>Use free AI tools for research and writing.</li>
+      <li>Use free social platforms for organic marketing.</li>
+      <li>Use free website hosting while validating the idea.</li>
+      <li>Use simple spreadsheets to track customers.</li>
+      <li>Only pay for software when it saves time or helps generate revenue.</li>
+    </ul>
+
+    <h3>9. Your Money Strategy</h3>
+
+    <p>${moneyPlan}</p>
+
+    <h3>10. Your 30-Day Target</h3>
+
     <p>
-      Focus on getting the first paying customer. After that, improve the
-      offer, document what works and automate the repetitive parts.
-      Revenue comes before fancy software. Humanity has suffered enough
-      from dashboards nobody uses.
+      Your first milestone should be a paying customer.
+      Once you prove that people will pay, improve the offer,
+      document the process and automate the repetitive parts.
+      Revenue comes before fancy software, because apparently
+      businesses still require customers.
     </p>
 
-    <h3>Soloco AI Recommendation</h3>
+    <h3>🔥 Soloco AI's Recommendation</h3>
+
     <p>
-      Because your goal is <strong>${safeGoal}</strong>, keep the business
-      simple at first. Spend your time on customers and sales while AI
-      handles as much of the technical and repetitive work as possible.
+      Because your goal is
+      <strong>${safeGoal}</strong>,
+      keep the business extremely simple at first.
+      Focus on one customer, one problem and one offer.
+      Use AI to reduce the amount of work required to operate it.
+    </p>
+
+    <p>
+      <strong>Next move:</strong>
+      Take the business concept above and try to get one real
+      customer before expanding the idea.
     </p>
   `;
 
   result.classList.add("visible");
-  result.scrollIntoView({behavior:"smooth", block:"start"});
+  result.scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
 }
 
-document.getElementById("generateButton").addEventListener("click", buildBusiness);
+document
+  .getElementById("generateButton")
+  .addEventListener("click", buildBusiness);
 
-document.getElementById("business").addEventListener("keydown", function(event) {
-  if (event.key === "Enter") buildBusiness();
-});
+document
+  .getElementById("business")
+  .addEventListener("keydown", function(event) {
+    if (event.key === "Enter") buildBusiness();
+  });
 
-document.getElementById("skills").addEventListener("keydown", function(event) {
-  if (event.key === "Enter") buildBusiness();
-});
+document
+  .getElementById("skills")
+  .addEventListener("keydown", function(event) {
+    if (event.key === "Enter") buildBusiness();
+  });
+   
 </script>
 
 </body>
