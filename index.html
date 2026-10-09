@@ -4,257 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Soloco AI | Build Your Business</title>
-
 <style>
 *{box-sizing:border-box}
-
 html{scroll-behavior:smooth}
-
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#031b0a;
-  color:#fff;
-  line-height:1.6;
-}
-
-header{
-  padding:20px 6%;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#031b0a;
-  border-bottom:1px solid #145c2a;
-  position:sticky;
-  top:0;
-  z-index:10;
-}
-
-.logo{
-  font-size:26px;
-  font-weight:bold;
-  color:#39ff14;
-}
-
-nav a{
-  color:#c9d6d0;
-  text-decoration:none;
-  margin-left:22px;
-}
-
+body{margin:0;font-family:Arial,sans-serif;background:#031b0a;color:#fff;line-height:1.6}
+header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;background:#031b0a;border-bottom:1px solid #145c2a;position:sticky;top:0;z-index:10}
+.logo{font-size:26px;font-weight:bold;color:#39ff14}
+nav a{color:#c9d6d0;text-decoration:none;margin-left:22px}
 nav a:hover{color:#55d6ff}
-
-.hero{
-  text-align:center;
-  padding:90px 20px 70px;
-  background:radial-gradient(circle at top,#096b2a,#031b0a 65%);
-}
-
-.hero h1{
-  font-size:clamp(42px,9vw,72px);
-  line-height:1.05;
-  margin:0 auto 25px;
-  max-width:800px;
-}
-
+.hero{text-align:center;padding:90px 20px 70px;background:radial-gradient(circle at top,#096b2a,#031b0a 65%)}
+.hero h1{font-size:clamp(42px,9vw,72px);line-height:1.05;margin:0 auto 25px;max-width:800px}
 .hero h1 span{color:#55d6ff}
-
-.hero p{
-  max-width:700px;
-  margin:0 auto 35px;
-  color:#c9d6d0;
-  font-size:20px;
-}
-
-.btn{
-  display:inline-block;
-  border:0;
-  border-radius:12px;
-  padding:17px 28px;
-  background:#55d6ff;
-  color:#06151b;
-  font-size:18px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:transform .15s ease,opacity .15s ease;
-}
-
-.btn:hover{
-  transform:translateY(-2px);
-  opacity:.92;
-}
-
+.hero p{max-width:700px;margin:0 auto 35px;color:#c9d6d0;font-size:20px}
+.btn{display:inline-block;border:0;border-radius:12px;padding:17px 28px;background:#55d6ff;color:#06151b;font-size:18px;font-weight:bold;cursor:pointer;transition:transform .15s ease,opacity .15s ease}
+.btn:hover{transform:translateY(-2px);opacity:.92}
 .btn:active{transform:translateY(0)}
-
-.section{
-  max-width:1000px;
-  margin:auto;
-  padding:70px 20px;
-}
-
-.section h2{
-  font-size:38px;
-  margin-bottom:10px;
-}
-
-.sub{
-  color:#aebdb6;
-  margin-bottom:35px;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:20px;
-}
-
-.card{
-  background:#0d1c2d;
-  border:1px solid #16415b;
-  border-radius:20px;
-  padding:28px;
-}
-
-.card h3{
-  color:#39ff14;
-  margin-top:0;
-  font-size:23px;
-}
-
-.builder{
-  background:#081f12;
-  border:1px solid #145c2a;
-  border-radius:24px;
-  padding:30px;
-}
-
-label{
-  display:block;
-  margin:18px 0 8px;
-  font-weight:bold;
-}
-
-input,select,textarea{
-  width:100%;
-  padding:15px;
-  border-radius:10px;
-  border:1px solid #315044;
-  background:#07140c;
-  color:white;
-  font-size:16px;
-}
-
-input:focus,select:focus,textarea:focus{
-  outline:2px solid #55d6ff;
-  border-color:#55d6ff;
-}
-
-textarea{
-  min-height:110px;
-  resize:vertical;
-}
-
-.generate-btn{
-  width:100%;
-  margin-top:8px;
-}
-
-.result{
-  display:none;
-  margin-top:30px;
-  padding:25px;
-  border-radius:18px;
-  background:#0d1c2d;
-  border:1px solid #55d6ff;
-}
-
+.btn:disabled{opacity:.65;cursor:wait;transform:none}
+.section{max-width:1000px;margin:auto;padding:70px 20px}
+.section h2{font-size:38px;margin-bottom:10px}
+.sub{color:#aebdb6;margin-bottom:35px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.card{background:#0d1c2d;border:1px solid #16415b;border-radius:20px;padding:28px}
+.card h3{color:#39ff14;margin-top:0;font-size:23px}
+.builder{background:#081f12;border:1px solid #145c2a;border-radius:24px;padding:30px}
+label{display:block;margin:18px 0 8px;font-weight:bold}
+input,select,textarea{width:100%;padding:15px;border-radius:10px;border:1px solid #315044;background:#07140c;color:white;font-size:16px}
+input:focus,select:focus,textarea:focus{outline:2px solid #55d6ff;border-color:#55d6ff}
+textarea{min-height:110px;resize:vertical}
+.generate-btn{width:100%;margin-top:8px}
+.result{display:none;margin-top:30px;padding:25px;border-radius:18px;background:#0d1c2d;border:1px solid #55d6ff}
 .result.visible{display:block}
-
-.result h2{
-  color:#55d6ff;
-  margin-top:0;
-  font-size:30px;
-}
-
+.result h2{color:#55d6ff;margin-top:0;font-size:30px}
 .result h3{color:#55d6ff}
-
 .result li{margin-bottom:10px}
-
-.notice{
-  color:#aebdb6;
-  font-size:14px;
-  margin-top:18px;
-}
-
-footer{
-  text-align:center;
-  padding:35px 20px;
-  border-top:1px solid #145c2a;
-  color:#8fa49a;
-}
-
-@media(max-width:600px){
-  header{padding:18px}
-  nav a{margin-left:10px;font-size:14px}
-  .hero{padding-top:65px}
-  .builder{padding:20px}
-}
+.notice{color:#aebdb6;font-size:14px;margin-top:18px}
+footer{text-align:center;padding:35px 20px;border-top:1px solid #145c2a;color:#8fa49a}
+@media(max-width:600px){header{padding:18px}nav a{margin-left:10px;font-size:14px}.hero{padding-top:65px}.builder{padding:20px}}
 </style>
 </head>
-
 <body>
-
 <header>
   <div class="logo">Soloco AI</div>
-  <nav>
-    <a href="#how">How It Works</a>
-    <a href="#builder">Start</a>
-  </nav>
+  <nav><a href="#how">How It Works</a><a href="#builder">Start</a></nav>
 </header>
-
 <section class="hero">
   <h1>Build Your Business.<br><span>Let AI Run It.</span></h1>
-  <p>
-    Tell Soloco AI what you want to build and get a practical
-    business blueprint, marketing plan and first steps.
-  </p>
+  <p>Tell Soloco AI what you want to build and get a practical business blueprint, marketing plan and first steps.</p>
   <a href="#builder" class="btn">Build My Business</a>
 </section>
-
 <section class="section" id="how">
   <h2>What Soloco AI Does</h2>
   <p class="sub">Turn an idea into a plan without drowning in technology nonsense.</p>
-
   <div class="cards">
-    <div class="card">
-      <h3>💡 Create</h3>
-      <p>Turn your skills, interests and ideas into possible businesses.</p>
-    </div>
-
-    <div class="card">
-      <h3>📣 Marketing</h3>
-      <p>Generate advertising ideas, social posts and promotional content.</p>
-    </div>
-
-    <div class="card">
-      <h3>⚙️ Automate</h3>
-      <p>Find repetitive work that can eventually be handled by automation.</p>
-    </div>
+    <div class="card"><h3>💡 Create</h3><p>Turn your skills, interests and ideas into possible businesses.</p></div>
+    <div class="card"><h3>📣 Marketing</h3><p>Generate advertising ideas, social posts and promotional content.</p></div>
+    <div class="card"><h3>⚙️ Automate</h3><p>Find repetitive work that can eventually be handled by automation.</p></div>
   </div>
 </section>
-
 <section class="section" id="builder">
   <h2>Start Building</h2>
   <p class="sub">Give Soloco AI a little information. It will build your starting blueprint.</p>
-
   <div class="builder">
-
     <label for="business">What kind of business do you want?</label>
-    <input id="business" type="text" placeholder="Example: online fishing business">
-
+    <input id="business" type="text" maxlength="500" placeholder="Example: online fishing business">
     <label for="skills">What are you good at?</label>
-    <input id="skills" type="text" placeholder="Example: fishing, woodworking, sales">
-
+    <input id="skills" type="text" maxlength="500" placeholder="Example: fishing, woodworking, sales">
     <label for="budget">How much can you spend to start?</label>
     <select id="budget">
       <option value="0">$0 or almost nothing</option>
@@ -263,7 +77,6 @@ footer{
       <option value="1000">$500 - $1,000</option>
       <option value="5000">$1,000+</option>
     </select>
-
     <label for="goal">What is your main goal?</label>
     <select id="goal">
       <option>Make money quickly</option>
@@ -271,24 +84,13 @@ footer{
       <option>Replace my job</option>
       <option>Create a side business</option>
     </select>
-
     <br>
-
-    <button type="button" class="btn generate-btn" id="generateButton">
-      Generate My Business Plan
-    </button>
-
-    <p class="notice">Your blueprint is generated instantly in your browser. No account or paid AI API is required for this version.</p>
-
+    <button type="button" class="btn generate-btn" id="generateButton">Generate My Business Plan</button>
+    <p class="notice">Soloco AI uses Gemini to generate a customized plan. Availability and usage limits depend on your API account.</p>
     <div class="result" id="result" aria-live="polite"></div>
-
   </div>
 </section>
-
-<footer>
-  © 2026 Soloco AI. Build smarter. Work less.
-</footer>
-
+<footer>© 2026 Soloco AI. Build smarter. Work less.</footer>
 <script>
 function escapeHTML(value) {
   return String(value)
@@ -299,264 +101,65 @@ function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 }
 
-function buildBusiness() {
+async function buildBusiness() {
   const business = document.getElementById("business").value.trim();
   const skills = document.getElementById("skills").value.trim();
   const budgetSelect = document.getElementById("budget");
-  const budget = budgetSelect.value;
   const budgetText = budgetSelect.options[budgetSelect.selectedIndex].text;
   const goal = document.getElementById("goal").value;
   const result = document.getElementById("result");
+  const button = document.getElementById("generateButton");
 
   if (!business || !skills) {
-    result.innerHTML = `
-      <h2>We need two things first.</h2>
-      <p>Tell us what business you want to build and what you're good at.</p>
-    `;
+    result.innerHTML = "<h2>Two things needed first</h2><p>Enter your business idea and your skills.</p>";
     result.classList.add("visible");
-    result.scrollIntoView({behavior:"smooth", block:"nearest"});
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
     return;
   }
 
-  const safeBusiness = escapeHTML(business);
-  const safeSkills = escapeHTML(skills);
-  const safeGoal = escapeHTML(goal);
-  const safeBudget = escapeHTML(budgetText);
-
-  let startupPlan = "";
-  let moneyPlan = "";
-
-  if (budget === "0") {
-    startupPlan = `
-      Start with free tools and direct customer outreach.
-      Do not spend money on advertising until someone proves they
-      will pay for the offer.
-    `;
-
-    moneyPlan = `
-      Your first target is not a huge business. It is your first
-      $100. Find one person with a problem you can solve and make
-      a simple offer.
-    `;
-  } else if (budget === "100") {
-    startupPlan = `
-      Keep most of your money untouched. Use a small amount only
-      for something that directly improves credibility or helps
-      you reach customers.
-    `;
-
-    moneyPlan = `
-      Aim for your first customer quickly, then reinvest only
-      part of the revenue into tools that save time or increase sales.
-    `;
-  } else if (budget === "500") {
-    startupPlan = `
-      Build a professional basic presence, but reserve most of
-      the budget for testing customer acquisition.
-    `;
-
-    moneyPlan = `
-      Test several ways to reach customers and track which method
-      produces actual paying customers.
-    `;
-  } else {
-    startupPlan = `
-      Use the available budget carefully. Build the basic business
-      first, test the offer and only increase spending after the
-      numbers show that customers are responding.
-    `;
-
-    moneyPlan = `
-      Use your budget to accelerate something that already works,
-      not to gamble on an untested idea.
-    `;
-  }
-
-  result.innerHTML = `
-    <h2>🚀 Your Soloco AI Business Blueprint</h2>
-
-    <p>
-      <strong>Business idea:</strong> ${safeBusiness}
-    </p>
-
-    <p>
-      <strong>Your strengths:</strong> ${safeSkills}
-    </p>
-
-    <p>
-      <strong>Starting budget:</strong> ${safeBudget}
-    </p>
-
-    <p>
-      <strong>Main goal:</strong> ${safeGoal}
-    </p>
-
-    <h3>1. Your Business Concept</h3>
-
-    <p>
-      Build a focused business around
-      <strong>${safeBusiness}</strong>.
-      Your advantage is your knowledge of
-      <strong>${safeSkills}</strong>.
-      Use AI to handle research, writing, planning, customer
-      communication, content creation and repetitive work.
-    </p>
-
-    <h3>2. Who You Should Sell To</h3>
-
-    <p>
-      Start with one clearly defined group of people who already
-      have the problem your business can solve.
-      Do not try to sell to everybody. Everybody is usually code
-      for nobody.
-    </p>
-
-    <h3>3. Your First Offer</h3>
-
-    <p>
-      Create one simple offer with a clear result.
-      The customer should immediately understand:
-      what they get, who it is for, what problem it solves,
-      and why they should buy it now.
-    </p>
-
-    <p>
-      <strong>Simple offer formula:</strong><br>
-      I help [specific customer] get [specific result]
-      without [major frustration].
-    </p>
-
-    <h3>4. Startup Strategy</h3>
-
-    <p>${startupPlan}</p>
-
-    <h3>5. How You Make Your First $100</h3>
-
-    <ol>
-      <li>Choose one specific customer type.</li>
-      <li>Find 20 potential customers online.</li>
-      <li>Contact them with a short, personalized message.</li>
-      <li>Offer a simple solution to one problem.</li>
-      <li>Ask for the sale instead of waiting for people to discover you.</li>
-      <li>Use the first customer's feedback to improve the offer.</li>
-    </ol>
-
-    <h3>6. AI Workload</h3>
-
-    <ul>
-      <li>Research customers and competitors.</li>
-      <li>Write website copy.</li>
-      <li>Create social media posts.</li>
-      <li>Generate advertising ideas.</li>
-      <li>Write sales messages.</li>
-      <li>Create customer follow-ups.</li>
-      <li>Organize ideas and leads.</li>
-      <li>Turn repetitive tasks into repeatable systems.</li>
-    </ul>
-
-    <h3>7. Your 7-Day Launch Plan</h3>
-
-    <ol>
-      <li>
-        <strong>Day 1:</strong>
-        Define the customer, problem and offer.
-      </li>
-
-      <li>
-        <strong>Day 2:</strong>
-        Create your basic business page and sales message.
-      </li>
-
-      <li>
-        <strong>Day 3:</strong>
-        Create your first 5 pieces of promotional content.
-      </li>
-
-      <li>
-        <strong>Day 4:</strong>
-        Find at least 20 potential customers.
-      </li>
-
-      <li>
-        <strong>Day 5:</strong>
-        Contact potential customers directly.
-      </li>
-
-      <li>
-        <strong>Day 6:</strong>
-        Follow up and improve the offer based on responses.
-      </li>
-
-      <li>
-        <strong>Day 7:</strong>
-        Review what worked and repeat the best-performing activity.
-      </li>
-    </ol>
-
-    <h3>8. Free-First Tool Strategy</h3>
-
-    <ul>
-      <li>Use free AI tools for research and writing.</li>
-      <li>Use free social platforms for organic marketing.</li>
-      <li>Use free website hosting while validating the idea.</li>
-      <li>Use simple spreadsheets to track customers.</li>
-      <li>Only pay for software when it saves time or helps generate revenue.</li>
-    </ul>
-
-    <h3>9. Your Money Strategy</h3>
-
-    <p>${moneyPlan}</p>
-
-    <h3>10. Your 30-Day Target</h3>
-
-    <p>
-      Your first milestone should be a paying customer.
-      Once you prove that people will pay, improve the offer,
-      document the process and automate the repetitive parts.
-      Revenue comes before fancy software, because apparently
-      businesses still require customers.
-    </p>
-
-    <h3>🔥 Soloco AI's Recommendation</h3>
-
-    <p>
-      Because your goal is
-      <strong>${safeGoal}</strong>,
-      keep the business extremely simple at first.
-      Focus on one customer, one problem and one offer.
-      Use AI to reduce the amount of work required to operate it.
-    </p>
-
-    <p>
-      <strong>Next move:</strong>
-      Take the business concept above and try to get one real
-      customer before expanding the idea.
-    </p>
-  `;
-
+  result.innerHTML = "<h2>Soloco AI is building your business plan...</h2><p>Analyzing your idea, customers, marketing, and operations.</p>";
   result.classList.add("visible");
-  result.scrollIntoView({
-    behavior:"smooth",
-    block:"start"
-  });
+  result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  button.disabled = true;
+  button.textContent = "Generating...";
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ business, skills, budget: budgetText, goal })
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Plan generation failed.");
+    }
+
+    result.innerHTML =
+      "<h2>Your AI Business Operating Plan</h2>" +
+      '<div style="white-space:pre-wrap;line-height:1.8">' +
+      escapeHTML(data.plan || "") +
+      "</div>" +
+      '<p class="notice">AI recommendations are a starting point. Validate costs, customer demand, and revenue assumptions before spending.</p>';
+  } catch (error) {
+    result.innerHTML =
+      "<h2>We couldn't generate your plan</h2>" +
+      "<p>" + escapeHTML(error.message || "Unknown error") + "</p>" +
+      "<p>Check your connection and try again.</p>";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Generate My Business Plan";
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
-document
-  .getElementById("generateButton")
-  .addEventListener("click", buildBusiness);
-
-document
-  .getElementById("business")
-  .addEventListener("keydown", function(event) {
-    if (event.key === "Enter") buildBusiness();
-  });
-
-document
-  .getElementById("skills")
-  .addEventListener("keydown", function(event) {
-    if (event.key === "Enter") buildBusiness();
-  });
+document.getElementById("generateButton").addEventListener("click", buildBusiness);
+document.getElementById("business").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") buildBusiness();
+});
+document.getElementById("skills").addEventListener("keydown", function(event) {
+  if (event.key === "Enter") buildBusiness();
+});
 </script>
-
 </body>
 </html>
