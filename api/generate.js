@@ -6,9 +6,11 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
+
   if (!apiKey) {
+    console.error("Gemini configuration: API key missing.");
     return res.status(500).json({
-      error: "GEMINI_API_KEY is missing in Vercel."
+      error: "Gemini is not configured in Vercel."
     });
   }
 
@@ -32,7 +34,8 @@ export default async function handler(req, res) {
   }
 
   const prompt = `
-Create a specific business operating plan for:
+Create a specific business operating plan.
+
 Business: ${business.trim()}
 Skills: ${skills.trim()}
 Budget: ${String(budget || "unspecified").slice(0, 100)}
@@ -40,7 +43,7 @@ Goal: ${String(goal || "unspecified").slice(0, 200)}
 
 Include:
 1. Business model and paying customers.
-2. Specific offer and realistic pricing.
+2. A specific offer and realistic pricing.
 3. Customer acquisition and marketing.
 4. Three ready-to-use marketing messages.
 5. Sales scripts and follow-up.
@@ -50,9 +53,9 @@ Include:
 9. Automation opportunities and required integrations.
 10. The single most important next action.
 
-Be practical and specific. Respect the budget.
-Never guarantee revenue or claim actions were performed.
-Return a detailed plain-text plan.
+Respect the budget. Do not guarantee revenue or claim
+that actions were performed when they were not.
+Return a detailed, practical plain-text plan.
 `;
 
   try {
@@ -65,41 +68,88 @@ Return a detailed plain-text plan.
           "x-goog-api-key": apiKey
         },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [
+            { parts: [{ text: prompt }] }
+          ],
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 5000
           }
-        })
+        }),
+        signal: AbortSignal.timeout(50000)
       }
     );
 
-    const data = await response.json();
+    const raw = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = {};
+    }
 
     if (!response.ok) {
-      console.error("Gemini HTTP status:", response.status);
-      return res.status(response.status === 429 ? 429 : 502).json({
-        error: response.status === 429
-          ? "Gemini usage limit reached. Try later."
-          : "Gemini request failed. Check API access and model availability."
+      const googleMessage =
+        data?.error?.message || "No error details returned.";
+
+      // Diagnostic only. Never log the API key.
+      console.error("Gemini API failure:", {
+        status: response.status,
+        message: googleMessage
+      });
+
+      if (response.status === 429) {
+        return res.status(429).json({
+          error: "Gemini usage limit reached. Try again later."
+        });
+      }
+
+      if (response.status === 404) {
+        return res.status(502).json({
+          error:
+            "Gemini could not find the requested resource. " +
+            "Check the model name and the Vercel function logs."
+        });
+      }
+
+      return res.status(502).json({
+        error:
+          "Gemini returned an error. Check the Vercel function logs."
       });
     }
 
-    const plan = data.candidates?.[0]?.content?.parts
+    const plan = data?.candidates?.[0]?.content?.parts
       ?.map(part => part.text || "")
       .join("\n")
       .trim();
 
     if (!plan) {
+      console.error("Gemini returned no usable plan.", {
+        blockReason: data?.promptFeedback?.blockReason,
+        finishReason: data?.candidates?.[0]?.finishReason
+      });
+
       return res.status(502).json({
-        error: "Gemini returned no business plan."
+        error:
+          "Gemini returned no usable plan. Try a different request."
       });
     }
 
     return res.status(200).json({ plan });
-  } catch {
-    return res.status(500).json({
-      error: "Could not contact Gemini. Please try again."
+
+  } catch (error) {
+    console.error("Gemini connection failure:", {
+      name: error?.name,
+      message: error?.message
+    });
+
+    return res.status(502).json({
+      error:
+        error?.name === "TimeoutError" ||
+        error?.name === "AbortError"
+          ? "Gemini took too long to respond. Try again."
+          : "Could not contact Gemini. Check the Vercel logs."
     });
   }
 }
