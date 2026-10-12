@@ -1,165 +1,386 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Soloco AI | Build Your Business</title>
-<style>
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:Arial,sans-serif;background:#031b0a;color:#fff;line-height:1.6}
-header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;background:#031b0a;border-bottom:1px solid #145c2a;position:sticky;top:0;z-index:10}
-.logo{font-size:26px;font-weight:bold;color:#39ff14}
-nav a{color:#c9d6d0;text-decoration:none;margin-left:22px}
-nav a:hover{color:#55d6ff}
-.hero{text-align:center;padding:90px 20px 70px;background:radial-gradient(circle at top,#096b2a,#031b0a 65%)}
-.hero h1{font-size:clamp(42px,9vw,72px);line-height:1.05;margin:0 auto 25px;max-width:800px}
-.hero h1 span{color:#55d6ff}
-.hero p{max-width:700px;margin:0 auto 35px;color:#c9d6d0;font-size:20px}
-.btn{display:inline-block;border:0;border-radius:12px;padding:17px 28px;background:#55d6ff;color:#06151b;font-size:18px;font-weight:bold;cursor:pointer;transition:transform .15s ease,opacity .15s ease}
-.btn:hover{transform:translateY(-2px);opacity:.92}
-.btn:active{transform:translateY(0)}
-.btn:disabled{opacity:.65;cursor:wait;transform:none}
-.section{max-width:1000px;margin:auto;padding:70px 20px}
-.section h2{font-size:38px;margin-bottom:10px}
-.sub{color:#aebdb6;margin-bottom:35px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
-.card{background:#0d1c2d;border:1px solid #16415b;border-radius:20px;padding:28px}
-.card h3{color:#39ff14;margin-top:0;font-size:23px}
-.builder{background:#081f12;border:1px solid #145c2a;border-radius:24px;padding:30px}
-label{display:block;margin:18px 0 8px;font-weight:bold}
-input,select,textarea{width:100%;padding:15px;border-radius:10px;border:1px solid #315044;background:#07140c;color:white;font-size:16px}
-input:focus,select:focus,textarea:focus{outline:2px solid #55d6ff;border-color:#55d6ff}
-textarea{min-height:110px;resize:vertical}
-.generate-btn{width:100%;margin-top:8px}
-.result{display:none;margin-top:30px;padding:25px;border-radius:18px;background:#0d1c2d;border:1px solid #55d6ff}
-.result.visible{display:block}
-.result h2{color:#55d6ff;margin-top:0;font-size:30px}
-.result h3{color:#55d6ff}
-.result li{margin-bottom:10px}
-.notice{color:#aebdb6;font-size:14px;margin-top:18px}
-footer{text-align:center;padding:35px 20px;border-top:1px solid #145c2a;color:#8fa49a}
-@media(max-width:600px){header{padding:18px}nav a{margin-left:10px;font-size:14px}.hero{padding-top:65px}.builder{padding:20px}}
-</style>
-</head>
-<body>
-<header>
-  <div class="logo">Soloco AI</div>
-  <nav><a href="#how">How It Works</a><a href="#builder">Start</a></nav>
-</header>
-<section class="hero">
-  <h1>Build Your Business.<br><span>Let AI Run It.</span></h1>
-  <p>Tell Soloco AI what you want to build and get a practical business blueprint, marketing plan and first steps.</p>
-  <a href="#builder" class="btn">Build My Business</a>
-</section>
-<section class="section" id="how">
-  <h2>What Soloco AI Does</h2>
-  <p class="sub">Turn an idea into a plan without drowning in technology nonsense.</p>
-  <div class="cards">
-    <div class="card"><h3>💡 Create</h3><p>Turn your skills, interests and ideas into possible businesses.</p></div>
-    <div class="card"><h3>📣 Marketing</h3><p>Generate advertising ideas, social posts and promotional content.</p></div>
-    <div class="card"><h3>⚙️ Automate</h3><p>Find repetitive work that can eventually be handled by automation.</p></div>
-  </div>
-</section>
-<section class="section" id="builder">
-  <h2>Start Building</h2>
-  <p class="sub">Give Soloco AI a little information. It will build your starting blueprint.</p>
-  <div class="builder">
-    <label for="business">What kind of business do you want?</label>
-    <input id="business" type="text" maxlength="500" placeholder="Example: online fishing business">
-    <label for="skills">What are you good at?</label>
-    <input id="skills" type="text" maxlength="500" placeholder="Example: fishing, woodworking, sales">
-    <label for="budget">How much can you spend to start?</label>
-    <select id="budget">
-      <option value="0">$0 or almost nothing</option>
-      <option value="100">Under $100</option>
-      <option value="500">$100 - $500</option>
-      <option value="1000">$500 - $1,000</option>
-      <option value="5000">$1,000+</option>
-    </select>
-    <label for="goal">What is your main goal?</label>
-    <select id="goal">
-      <option>Make money quickly</option>
-      <option>Build long-term income</option>
-      <option>Replace my job</option>
-      <option>Create a side business</option>
-    </select>
-    <br>
-    <button type="button" class="btn generate-btn" id="generateButton">Generate My Business Plan</button>
-    <p class="notice">Soloco AI uses Gemini to generate a customized plan. Availability and usage limits depend on your API account.</p>
-    <div class="result" id="result" aria-live="polite"></div>
-  </div>
-</section>
-<footer>© 2026 Soloco AI. Build smarter. Work less.</footer>
-<script>
-function escapeHTML(value) {
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#031b0a">
+  <meta name="description" content="Turn your business idea into a practical launch plan with Soloco AI.">
+  <title>Soloco AI | Build Your Business</title>
 
-async function buildBusiness() {
-  const business = document.getElementById("business").value.trim();
-  const skills = document.getElementById("skills").value.trim();
-  const budgetSelect = document.getElementById("budget");
-  const budgetText = budgetSelect.options[budgetSelect.selectedIndex].text;
-  const goal = document.getElementById("goal").value;
-  const result = document.getElementById("result");
-  const button = document.getElementById("generateButton");
-
-  if (!business || !skills) {
-    result.innerHTML = "<h2>Two things needed first</h2><p>Enter your business idea and your skills.</p>";
-    result.classList.add("visible");
-    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    return;
-  }
-
-  result.innerHTML = "<h2>Soloco AI is building your business plan...</h2><p>Analyzing your idea, customers, marketing, and operations.</p>";
-  result.classList.add("visible");
-  result.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  button.disabled = true;
-  button.textContent = "Generating...";
-
-  try {
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ business, skills, budget: budgetText, goal })
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Plan generation failed.");
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #031b0a;
+      --panel: #0b2018;
+      --card: #0c1d2b;
+      --green: #39ff14;
+      --blue: #55d8ff;
+      --text: #f5f7f6;
+      --muted: #a7b9b0;
+      --border: #245b39;
     }
 
-    result.innerHTML =
-      "<h2>Your AI Business Operating Plan</h2>" +
-      '<div style="white-space:pre-wrap;line-height:1.8">' +
-      escapeHTML(data.plan || "") +
-      "</div>" +
-      '<p class="notice">AI recommendations are a starting point. Validate costs, customer demand, and revenue assumptions before spending.</p>';
-  } catch (error) {
-    result.innerHTML =
-      "<h2>We couldn't generate your plan</h2>" +
-      "<p>" + escapeHTML(error.message || "Unknown error") + "</p>" +
-      "<p>Check your connection and try again.</p>";
-  } finally {
-    button.disabled = false;
-    button.textContent = "Generate My Business Plan";
-    result.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
+    * { box-sizing: border-box; }
 
-document.getElementById("generateButton").addEventListener("click", buildBusiness);
-document.getElementById("business").addEventListener("keydown", function(event) {
-  if (event.key === "Enter") buildBusiness();
-});
-document.getElementById("skills").addEventListener("keydown", function(event) {
-  if (event.key === "Enter") buildBusiness();
-});
-</script>
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: #02180a;
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav {
+      max-width: 1050px;
+      margin: auto;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo {
+      color: var(--green);
+      font-size: 28px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    nav a:last-child {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    main {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 38px 20px 64px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 22px 0 30px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: clamp(36px, 7vw, 58px);
+      line-height: 1.12;
+      margin: 12px 0;
+    }
+
+    h1 span, h2 { color: var(--blue); }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 620px;
+      margin: 16px auto;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: clamp(18px, 4vw, 32px);
+    }
+
+    label {
+      display: block;
+      margin: 20px 0 7px;
+      font-weight: 700;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #496657;
+      border-radius: 10px;
+      background: #07150e;
+      color: var(--text);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 15px 18px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--green);
+      color: #031b0a;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .status {
+      margin-top: 18px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .status.error { color: #ffaaa7; }
+
+    .results {
+      margin-top: 24px;
+      padding: clamp(18px, 4vw, 30px);
+      background: var(--card);
+      border: 1px solid var(--blue);
+      border-radius: 18px;
+    }
+
+    .results h2 { margin-top: 0; }
+
+    .result-text {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.8;
+    }
+
+    .hidden { display: none; }
+
+    .disclaimer {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 18px;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 25px 16px;
+      text-align: center;
+      color: #91a79a;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <nav>
+      <a class="logo" href="#">Soloco AI</a>
+      <a href="#builder">Build your business</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">Your idea. Your next move.</div>
+      <h1>Build smarter.<br><span>Start with what you have.</span></h1>
+      <p>
+        Turn your skills and business idea into a practical launch strategy.
+        Start with free tools, focus on your first customer, and grow step by step.
+      </p>
+    </section>
+
+    <section class="panel" id="builder">
+      <h2>Build your business</h2>
+      <p>Tell Soloco AI a little about what you want to accomplish.</p>
+
+      <form id="businessForm">
+        <label for="business">What kind of business do you want?</label>
+        <textarea
+          id="business"
+          name="business"
+          maxlength="2000"
+          placeholder="Example: Help local businesses get more customers using AI."
+          required
+        ></textarea>
+
+        <label for="skills">What are you good at?</label>
+        <textarea
+          id="skills"
+          name="skills"
+          maxlength="1500"
+          placeholder="Your skills, experience, interests, equipment, or available time."
+        ></textarea>
+
+        <label for="budget">How much can you spend to start?</label>
+        <select id="budget" name="budget">
+          <option value="$0"> $0 or almost nothing</option>
+          <option value="Under $100">Under $100</option>
+          <option value="$100-$500">$100–$500</option>
+          <option value="$500-$1000">$500–$1,000</option>
+          <option value="$1000+">$1,000+</option>
+        </select>
+
+        <label for="goal">What is your main goal?</label>
+        <select id="goal" name="goal">
+          <option value="Earn money as soon as realistically possible">
+            Earn money as soon as realistically possible
+          </option>
+          <option value="Build long-term recurring income">
+            Build long-term recurring income
+          </option>
+          <option value="Replace my job">
+            Replace my job
+          </option>
+          <option value="Build a side business">
+            Build a side business
+          </option>
+        </select>
+
+        <button id="generateButton" type="submit">
+          Build My Business Strategy
+        </button>
+
+        <p class="hint">
+          Start with free actions. No income is guaranteed, and paid actions
+          should be reviewed before you commit.
+        </p>
+      </form>
+
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <section id="results" class="results hidden" aria-live="polite">
+        <h2>Your next moves</h2>
+        <div id="resultText" class="result-text"></div>
+        <button id="copyButton" type="button">Copy My Strategy</button>
+      </section>
+
+      <p class="disclaimer">
+        Soloco AI generates recommendations and drafts. It does not
+        automatically spend money, contact customers, or complete external
+        actions.
+      </p>
+    </section>
+  </main>
+
+  <footer>© 2026 Soloco AI. Build smarter. Work less.</footer>
+
+  <script>
+    const form = document.getElementById("businessForm");
+    const button = document.getElementById("generateButton");
+    const statusBox = document.getElementById("status");
+    const results = document.getElementById("results");
+    const resultText = document.getElementById("resultText");
+    const copyButton = document.getElementById("copyButton");
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const business = document.getElementById("business").value.trim();
+      const skills = document.getElementById("skills").value.trim();
+      const budget = document.getElementById("budget").value;
+      const goal = document.getElementById("goal").value;
+
+      if (!business) {
+        statusBox.textContent = "Please describe your business idea first.";
+        statusBox.className = "status error";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Building your strategy...";
+      statusBox.className = "status";
+      statusBox.textContent = "Soloco AI is working. This may take a moment.";
+      results.classList.add("hidden");
+      resultText.textContent = "";
+
+      try {
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({ business, skills, budget, goal })
+        });
+
+        const responseText = await response.text();
+        let data;
+
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          throw new Error(
+            responseText.startsWith("<!DOCTYPE") ||
+            responseText.startsWith("<html")
+              ? "The server returned a web page instead of an API response. Check the Vercel deployment and API route."
+              : "The server returned an unreadable response. Check the Vercel function logs."
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error || `Request failed with HTTP ${response.status}.`
+          );
+        }
+
+        const output = data?.text || data?.result || data?.plan;
+
+        if (typeof output !== "string" || !output.trim()) {
+          throw new Error("The AI returned no strategy. Please try again.");
+        }
+
+        resultText.textContent = output;
+        results.classList.remove("hidden");
+        statusBox.textContent = "Your business strategy is ready.";
+        statusBox.className = "status";
+        results.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        console.error("Soloco AI request failed:", error);
+        statusBox.textContent =
+          error.message || "Something went wrong. Please try again.";
+        statusBox.className = "status error";
+      } finally {
+        button.disabled = false;
+        button.textContent = "Build My Business Strategy";
+      }
+    });
+
+    copyButton.addEventListener("click", async function () {
+      const text = resultText.textContent;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyButton.textContent = "Copied!";
+        setTimeout(() => {
+          copyButton.textContent = "Copy My Strategy";
+        }, 2000);
+      } catch {
+        statusBox.textContent =
+          "Copy wasn't available in this browser. Select the strategy text and copy it manually.";
+        statusBox.className = "status error";
+      }
+    });
+  </script>
 </body>
 </html>
