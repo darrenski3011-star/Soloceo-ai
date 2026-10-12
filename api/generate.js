@@ -111,9 +111,16 @@ RULES:
       }
     );
 
-    const data = await response.json().catch(() => ({}));
+    const responseText = await response.text();
 
-    if (!response.ok) {
+let data = {};
+try {
+  data = JSON.parse(responseText);
+} catch {
+  data = { error: responseText };
+}
+
+if (!response.ok) {
       console.error("Gemini API error:", response.status, data);
       return res.status(502).json({
         error: data?.error?.message ||
