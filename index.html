@@ -2,385 +2,601 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#031b0a">
-  <meta name="description" content="Turn your business idea into a practical launch plan with Soloco AI.">
-  <title>Soloco AI | Build Your Business</title>
-
-  <style>
-    :root {
-      color-scheme: dark;
-      --background: #031b0a;
-      --panel: #0b2018;
-      --card: #0c1d2b;
-      --green: #39ff14;
-      --blue: #55d8ff;
-      --text: #f5f7f6;
-      --muted: #a7b9b0;
-      --border: #245b39;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--background);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-      line-height: 1.6;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      background: #02180a;
-      border-bottom: 1px solid var(--border);
-    }
-
-    nav {
-      max-width: 1050px;
-      margin: auto;
-      padding: 16px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .logo {
-      color: var(--green);
-      font-size: 28px;
-      font-weight: 800;
-      text-decoration: none;
-    }
-
-    nav a:last-child {
-      color: var(--text);
-      text-decoration: none;
-    }
-
-    main {
-      width: min(900px, 100%);
-      margin: 0 auto;
-      padding: 38px 20px 64px;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 22px 0 30px;
-    }
-
-    .eyebrow {
-      color: var(--green);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      font-size: clamp(36px, 7vw, 58px);
-      line-height: 1.12;
-      margin: 12px 0;
-    }
-
-    h1 span, h2 { color: var(--blue); }
-
-    .hero p {
-      color: var(--muted);
-      max-width: 620px;
-      margin: 16px auto;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: clamp(18px, 4vw, 32px);
-    }
-
-    label {
-      display: block;
-      margin: 20px 0 7px;
-      font-weight: 700;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid #496657;
-      border-radius: 10px;
-      background: #07150e;
-      color: var(--text);
-      font: inherit;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    input:focus, textarea:focus, select:focus {
-      outline: 2px solid var(--blue);
-      outline-offset: 2px;
-    }
-
-    .hint {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 6px;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 24px;
-      padding: 15px 18px;
-      border: 0;
-      border-radius: 10px;
-      background: var(--green);
-      color: #031b0a;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      cursor: wait;
-      opacity: 0.65;
-    }
-
-    .status {
-      margin-top: 18px;
-      color: var(--muted);
-      overflow-wrap: anywhere;
-    }
-
-    .status.error { color: #ffaaa7; }
-
-    .results {
-      margin-top: 24px;
-      padding: clamp(18px, 4vw, 30px);
-      background: var(--card);
-      border: 1px solid var(--blue);
-      border-radius: 18px;
-    }
-
-    .results h2 { margin-top: 0; }
-
-    .result-text {
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      line-height: 1.8;
-    }
-
-    .hidden { display: none; }
-
-    .disclaimer {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 18px;
-    }
-
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 25px 16px;
-      text-align: center;
-      color: #91a79a;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#031b0a">
+<meta name="description" content="Soloco AI builds and helps operate your business.">
+<title>Soloco AI | Business Operator</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #031b0a;
+  --panel: #0b2018;
+  --card: #0c1d2b;
+  --green: #39ff14;
+  --blue: #55d8ff;
+  --text: #f5f7f6;
+  --muted: #a7b9b0;
+  --border: #245b39;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 Arial, sans-serif;
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #02180a;
+  border-bottom: 1px solid var(--border);
+}
+nav {
+  max-width: 1100px;
+  margin: auto;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.logo {
+  color: var(--green);
+  font-size: 25px;
+  font-weight: 800;
+  text-decoration: none;
+}
+nav a:last-child { color: var(--text); }
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 24px 16px 55px;
+}
+.hero { text-align: center; padding: 20px 0 28px; }
+.eyebrow {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+h1 { font-size: clamp(32px, 7vw, 54px); line-height: 1.15; }
+h1 span { color: var(--green); }
+h2 { color: var(--blue); margin-top: 0; }
+h3 { margin-bottom: 6px; }
+p { overflow-wrap: anywhere; }
+.muted, .hint, .small { color: var(--muted); }
+.small, .hint { font-size: 13px; }
+.panel, .card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+.card { background: var(--card); padding: 16px; }
+label { display: block; font-weight: bold; margin: 17px 0 6px; }
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #496657;
+  border-radius: 9px;
+  background: #07150e;
+  color: var(--text);
+  font: inherit;
+}
+textarea { min-height: 85px; resize: vertical; }
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.primary { background: var(--green); color: #031b0a; }
+.secondary {
+  background: #173728;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+button:disabled { opacity: .6; cursor: wait; }
+.full { width: 100%; margin-top: 20px; }
+.status { margin: 14px 0; overflow-wrap: anywhere; }
+.error { color: #ffaaa7; }
+.hidden { display: none !important; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 14px;
+}
+.section { margin-top: 28px; }
+.item {
+  border-bottom: 1px solid var(--border);
+  padding: 13px 0;
+}
+.item:last-child { border-bottom: 0; }
+.item p { margin: 6px 0; }
+.tag {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 12px;
+  color: var(--green);
+  overflow-wrap: anywhere;
+}
+.asset-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #06150e;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 10px 0;
+}
+.task-check {
+  width: auto;
+  margin-right: 8px;
+  accent-color: var(--green);
+}
+footer {
+  text-align: center;
+  padding: 24px 15px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+</style>
 </head>
-
 <body>
-  <header>
-    <nav>
-      <a class="logo" href="#">Soloco AI</a>
-      <a href="#builder">Build your business</a>
-    </nav>
-  </header>
+<header>
+  <nav>
+    <a class="logo" href="#">Soloco AI</a>
+    <a href="#builder">Business Operator</a>
+  </nav>
+</header>
 
-  <main>
-    <section class="hero">
-      <div class="eyebrow">Your idea. Your next move.</div>
-      <h1>Build smarter.<br><span>Start with what you have.</span></h1>
-      <p>
-        Turn your skills and business idea into a practical launch strategy.
-        Start with free tools, focus on your first customer, and grow step by step.
+<main>
+  <section class="hero">
+    <div class="eyebrow">Your AI business operator</div>
+    <h1>Build smarter.<br><span>Operate with AI.</span></h1>
+    <p class="muted">
+      Turn your idea into a business launch plan, useful business assets,
+      actionable work, and a path toward recurring revenue.
+    </p>
+  </section>
+
+  <section class="panel" id="builder">
+    <h2>Business command center</h2>
+    <p>Describe what you want Soloco AI to build and operate.</p>
+
+    <form id="businessForm">
+      <label for="business">What business should the AI build?</label>
+      <textarea id="business" maxlength="2000" required
+        placeholder="Example: Build a service that helps local contractors get more leads and manage follow-ups."></textarea>
+
+      <label for="skills">Your skills and available resources</label>
+      <textarea id="skills" maxlength="1500"
+        placeholder="Experience, equipment, interests, available time, or leave blank."></textarea>
+
+      <label for="budget">Startup budget</label>
+      <select id="budget">
+        <option value="$0">$0 or almost nothing</option>
+        <option value="Under $100">Under $100</option>
+        <option value="$100-$500">$100–$500</option>
+        <option value="$500-$1000">$500–$1,000</option>
+        <option value="$1000+">$1,000+</option>
+      </select>
+
+      <label for="goal">Main objective</label>
+      <select id="goal">
+        <option value="Earn money as soon as realistically possible">Get first paying customer</option>
+        <option value="Build long-term recurring income">Build recurring income</option>
+        <option value="Replace my job">Replace my job</option>
+        <option value="Build a side business">Build a side business</option>
+      </select>
+
+      <button class="primary full" id="generateButton" type="submit">
+        Build My Business
+      </button>
+    </form>
+
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="panel">
+      <h2 id="businessName">Your Business</h2>
+      <p id="businessModel"></p>
+      <div class="grid">
+        <div class="card">
+          <h3>Target customer</h3>
+          <p id="targetCustomer"></p>
+        </div>
+        <div class="card">
+          <h3>What you sell</h3>
+          <p id="offer"></p>
+        </div>
+        <div class="card">
+          <h3>Pricing hypothesis</h3>
+          <p id="pricing"></p>
+        </div>
+        <div class="card">
+          <h3>Recurring revenue</h3>
+          <p id="recurring"></p>
+        </div>
+      </div>
+      <h3>Recommended next action</h3>
+      <p id="nextAction"></p>
+      <button class="secondary" id="copyButton" type="button">Copy Business Summary</button>
+    </div>
+
+    <div class="section">
+      <h2>Launch priorities</h2>
+      <div class="panel" id="priorities"></div>
+    </div>
+
+    <div class="section">
+      <h2>AI work center</h2>
+      <p class="muted small">
+        Checkboxes track your progress in this browser session. They do not
+        execute tasks or save progress to a database.
       </p>
-    </section>
+      <div class="panel">
+        <div id="taskProgress" class="tag">0 tasks complete</div>
+        <div id="tasks"></div>
+      </div>
+    </div>
 
-    <section class="panel" id="builder">
-      <h2>Build your business</h2>
-      <p>Tell Soloco AI a little about what you want to accomplish.</p>
-
-      <form id="businessForm">
-        <label for="business">What kind of business do you want?</label>
-        <textarea
-          id="business"
-          name="business"
-          maxlength="2000"
-          placeholder="Example: Help local businesses get more customers using AI."
-          required
-        ></textarea>
-
-        <label for="skills">What are you good at?</label>
-        <textarea
-          id="skills"
-          name="skills"
-          maxlength="1500"
-          placeholder="Your skills, experience, interests, equipment, or available time."
-        ></textarea>
-
-        <label for="budget">How much can you spend to start?</label>
-        <select id="budget" name="budget">
-          <option value="$0"> $0 or almost nothing</option>
-          <option value="Under $100">Under $100</option>
-          <option value="$100-$500">$100–$500</option>
-          <option value="$500-$1000">$500–$1,000</option>
-          <option value="$1000+">$1,000+</option>
-        </select>
-
-        <label for="goal">What is your main goal?</label>
-        <select id="goal" name="goal">
-          <option value="Earn money as soon as realistically possible">
-            Earn money as soon as realistically possible
-          </option>
-          <option value="Build long-term recurring income">
-            Build long-term recurring income
-          </option>
-          <option value="Replace my job">
-            Replace my job
-          </option>
-          <option value="Build a side business">
-            Build a side business
-          </option>
-        </select>
-
-        <button id="generateButton" type="submit">
-          Build My Business Strategy
-        </button>
-
-        <p class="hint">
-          Start with free actions. No income is guaranteed, and paid actions
-          should be reviewed before you commit.
-        </p>
-      </form>
-
-      <div id="status" class="status" role="status" aria-live="polite"></div>
-
-      <section id="results" class="results hidden" aria-live="polite">
-        <h2>Your next moves</h2>
-        <div id="resultText" class="result-text"></div>
-        <button id="copyButton" type="button">Copy My Strategy</button>
-      </section>
-
-      <p class="disclaimer">
-        Soloco AI generates recommendations and drafts. It does not
-        automatically spend money, contact customers, or complete external
-        actions.
+    <div class="section">
+      <h2>Business assets</h2>
+      <p class="muted">
+        Drafts the AI generated for you to review and use.
       </p>
-    </section>
-  </main>
+      <div id="assets" class="grid"></div>
+    </div>
 
-  <footer>© 2026 Soloco AI. Build smarter. Work less.</footer>
+    <div class="section">
+      <h2>Approval queue</h2>
+      <div class="panel" id="approvals"></div>
+      <p class="small muted">
+        Approval tracking only. External actions are not executed by this
+        page. Real execution requires connected services and backend workflows.
+      </p>
+    </div>
 
-  <script>
-    const form = document.getElementById("businessForm");
-    const button = document.getElementById("generateButton");
-    const statusBox = document.getElementById("status");
-    const results = document.getElementById("results");
-    const resultText = document.getElementById("resultText");
-    const copyButton = document.getElementById("copyButton");
+    <div class="section">
+      <h2>Success metrics</h2>
+      <div id="metrics" class="grid"></div>
+    </div>
 
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
+    <div class="section">
+      <h2>Assumptions to verify</h2>
+      <div class="panel" id="assumptions"></div>
+    </div>
 
-      const business = document.getElementById("business").value.trim();
-      const skills = document.getElementById("skills").value.trim();
-      const budget = document.getElementById("budget").value;
-      const goal = document.getElementById("goal").value;
+    <div class="section">
+      <button class="secondary full" id="copyFullButton" type="button">
+        Copy Full Business Plan
+      </button>
+    </div>
+  </section>
 
-      if (!business) {
-        statusBox.textContent = "Please describe your business idea first.";
-        statusBox.className = "status error";
-        return;
-      }
+  <p class="small muted">
+    Soloco AI prepares plans and drafts. This version does not independently
+    contact customers, publish websites, spend money, or run scheduled jobs.
+    Those capabilities require additional integrations and backend systems.
+  </p>
+</main>
 
-      button.disabled = true;
-      button.textContent = "Building your strategy...";
-      statusBox.className = "status";
-      statusBox.textContent = "Soloco AI is working. This may take a moment.";
-      results.classList.add("hidden");
-      resultText.textContent = "";
+<footer>© 2026 Soloco AI | Build smarter. Operate better.</footer>
 
-      try {
-        const response = await fetch("/api/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({ business, skills, budget, goal })
-        });
+<script>
+const form = document.getElementById("businessForm");
+const generateButton = document.getElementById("generateButton");
+const statusBox = document.getElementById("status");
+const dashboard = document.getElementById("dashboard");
 
-        const responseText = await response.text();
-        let data;
+let latestOperator = null;
+let completedTasks = new Set();
+let approvalDecisions = {};
 
-        try {
-          data = JSON.parse(responseText);
-        } catch {
-          throw new Error(
-            responseText.startsWith("<!DOCTYPE") ||
-            responseText.startsWith("<html")
-              ? "The server returned a web page instead of an API response. Check the Vercel deployment and API route."
-              : "The server returned an unreadable response. Check the Vercel function logs."
-          );
-        }
+function setText(id, value) {
+  document.getElementById(id).textContent =
+    value == null || value === "" ? "Not provided." : String(value);
+}
 
-        if (!response.ok) {
-          throw new Error(
-            data?.error || `Request failed with HTTP ${response.status}.`
-          );
-        }
+function addText(parent, tag, value, className) {
+  const element = document.createElement(tag);
+  element.textContent = value == null ? "" : String(value);
+  if (className) element.className = className;
+  parent.appendChild(element);
+  return element;
+}
 
-        const output = data?.text || data?.result || data?.plan;
+function makeCard(parent, title, content) {
+  const card = document.createElement("article");
+  card.className = "card";
+  addText(card, "h3", title);
+  addText(card, "p", content);
+  parent.appendChild(card);
+  return card;
+}
 
-        if (typeof output !== "string" || !output.trim()) {
-          throw new Error("The AI returned no strategy. Please try again.");
-        }
+function renderList(containerId, items, renderItem) {
+  const container = document.getElementById(containerId);
+  container.replaceChildren();
 
-        resultText.textContent = output;
-        results.classList.remove("hidden");
-        statusBox.textContent = "Your business strategy is ready.";
-        statusBox.className = "status";
-        results.scrollIntoView({ behavior: "smooth", block: "start" });
-      } catch (error) {
-        console.error("Soloco AI request failed:", error);
-        statusBox.textContent =
-          error.message || "Something went wrong. Please try again.";
-        statusBox.className = "status error";
-      } finally {
-        button.disabled = false;
-        button.textContent = "Build My Business Strategy";
-      }
+  if (!Array.isArray(items) || items.length === 0) {
+    addText(container, "p", "No items were generated.");
+    return;
+  }
+
+  items.forEach((item, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "item";
+    renderItem(wrapper, item, index);
+    container.appendChild(wrapper);
+  });
+}
+
+function renderTasks(tasks) {
+  renderList("tasks", tasks, (wrapper, task, index) => {
+    const label = document.createElement("label");
+    label.style.margin = "0";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "task-check";
+    checkbox.checked = completedTasks.has(task.id);
+
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) completedTasks.add(task.id);
+      else completedTasks.delete(task.id);
+      updateTaskProgress(tasks);
     });
 
-    copyButton.addEventListener("click", async function () {
-      const text = resultText.textContent;
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(
+      task.title || `Task ${index + 1}`
+    ));
+    wrapper.appendChild(label);
 
-      try {
-        await navigator.clipboard.writeText(text);
-        copyButton.textContent = "Copied!";
-        setTimeout(() => {
-          copyButton.textContent = "Copy My Strategy";
-        }, 2000);
-      } catch {
-        statusBox.textContent =
-          "Copy wasn't available in this browser. Select the strategy text and copy it manually.";
-        statusBox.className = "status error";
-      }
+    addText(wrapper, "p", task.description || "");
+    addText(wrapper, "span",
+      task.actionType || "task", "tag");
+
+    if (task.requiresApproval) {
+      addText(wrapper, "p", "Requires human approval before execution.", "small");
+    }
+  });
+
+  updateTaskProgress(tasks);
+}
+
+function updateTaskProgress(tasks) {
+  const total = Array.isArray(tasks) ? tasks.length : 0;
+  const done = completedTasks.size;
+  setText("taskProgress", `${done} of ${total} tasks checked complete`);
+}
+
+function renderAssets(assets) {
+  const container = document.getElementById("assets");
+  container.replaceChildren();
+
+  if (!Array.isArray(assets) || assets.length === 0) {
+    addText(container, "p",
+      "No individual assets were returned. Check whether the backend returned an operator object.");
+    return;
+  }
+
+  assets.forEach((asset, index) => {
+    const card = document.createElement("article");
+    card.className = "card";
+
+    addText(card, "span", asset.type || "business asset", "tag");
+    addText(card, "h3", asset.title || `Asset ${index + 1}`);
+
+    const content = addText(card, "div", asset.content || "No content provided.", "asset-content");
+
+    const copy = document.createElement("button");
+    copy.className = "secondary";
+    copy.type = "button";
+    copy.textContent = "Copy Asset";
+    copy.addEventListener("click", () => copyText(content.textContent, copy));
+    card.appendChild(copy);
+
+    container.appendChild(card);
+  });
+}
+
+function renderApprovals(items) {
+  renderList("approvals", items, (wrapper, item, index) => {
+    addText(wrapper, "h3", item.title || `Approval ${index + 1}`);
+    addText(wrapper, "p", item.description || "");
+    const status = approvalDecisions[item.id] || item.status || "awaiting_approval";
+    addText(wrapper, "span", status, "tag");
+
+    const note = addText(wrapper, "p",
+      "This records your decision locally; it does not execute the action.",
+      "small");
+
+    const controls = document.createElement("div");
+    controls.style.display = "flex";
+    controls.style.flexWrap = "wrap";
+    controls.style.gap = "8px";
+
+    ["Approve", "Reject"].forEach(choice => {
+      const button = document.createElement("button");
+      button.className = "secondary";
+      button.type = "button";
+      button.textContent = choice;
+
+      button.addEventListener("click", () => {
+        approvalDecisions[item.id] =
+          choice === "Approve" ? "approved_locally" : "rejected_locally";
+        statusTag.textContent = approvalDecisions[item.id];
+        note.textContent =
+          "Decision recorded in this browser only. No external action was performed.";
+      });
+
+      controls.appendChild(button);
     });
-  </script>
+
+    const statusTag = wrapper.querySelector(".tag");
+    wrapper.appendChild(controls);
+  });
+}
+
+function renderOperator(operator) {
+  latestOperator = operator;
+  completedTasks = new Set();
+  approvalDecisions = {};
+
+  setText("businessName", operator.businessName);
+  setText("businessModel", operator.businessModel);
+  setText("targetCustomer", operator.targetCustomer);
+  setText("offer", operator.offer);
+  setText("pricing", operator.pricingHypothesis);
+  setText("recurring", operator.recurringRevenuePlan);
+  setText("nextAction", operator.nextAction);
+
+  renderList("priorities", operator.priorities, (wrapper, item, index) => {
+    addText(wrapper, "h3", `${index + 1}. ${item.title || "Priority"}`);
+    addText(wrapper, "p", item.reason || "");
+  });
+
+  renderTasks(operator.tasks || []);
+  renderAssets(operator.assets || []);
+  renderApprovals(operator.approvalQueue || []);
+
+  const metrics = document.getElementById("metrics");
+  metrics.replaceChildren();
+  (operator.metrics || []).forEach(metric => {
+    const card = document.createElement("article");
+    card.className = "card";
+    addText(card, "h3", metric.name || "Metric");
+    addText(card, "p", `Target: ${metric.target || "To be defined"}`);
+    addText(card, "p", `Measurement: ${metric.measurement || "To be defined"}`);
+    metrics.appendChild(card);
+  });
+  if (!operator.metrics || !operator.metrics.length) {
+    addText(metrics, "p", "No metrics returned.");
+  }
+
+  renderList("assumptions", operator.assumptions, (wrapper, item) => {
+    addText(wrapper, "p", item);
+  });
+
+  dashboard.classList.remove("hidden");
+  dashboard.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function summaryText(operator) {
+  return [
+    `BUSINESS: ${operator.businessName || ""}`,
+    `MODEL: ${operator.businessModel || ""}`,
+    `TARGET CUSTOMER: ${operator.targetCustomer || ""}`,
+    `OFFER: ${operator.offer || ""}`,
+    `PRICING: ${operator.pricingHypothesis || ""}`,
+    `RECURRING REVENUE: ${operator.recurringRevenuePlan || ""}`,
+    `NEXT ACTION: ${operator.nextAction || ""}`
+  ].join("\n\n");
+}
+
+function fullPlanText(operator) {
+  return JSON.stringify(operator, null, 2);
+}
+
+async function copyText(text, button) {
+  try {
+    await navigator.clipboard.writeText(text);
+    const oldText = button.textContent;
+    button.textContent = "Copied!";
+    setTimeout(() => button.textContent = oldText, 1800);
+  } catch {
+    statusBox.textContent =
+      "Clipboard access is unavailable. Select and copy the text manually.";
+    statusBox.className = "status error";
+  }
+}
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const business = document.getElementById("business").value.trim();
+  const skills = document.getElementById("skills").value.trim();
+  const budget = document.getElementById("budget").value;
+  const goal = document.getElementById("goal").value;
+
+  if (!business) {
+    statusBox.textContent = "Describe the business first.";
+    statusBox.className = "status error";
+    return;
+  }
+
+  generateButton.disabled = true;
+  generateButton.textContent = "Building your business...";
+  statusBox.className = "status";
+  statusBox.textContent = "Generating your plan and business assets...";
+  dashboard.classList.add("hidden");
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ business, skills, budget, goal })
+    });
+
+    const responseText = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      throw new Error(
+        "The server returned a non-JSON response. Check the Vercel deployment and API route."
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error || `Request failed: ${response.status}`);
+    }
+
+    if (data.operator && typeof data.operator === "object") {
+      renderOperator(data.operator);
+      statusBox.textContent = "Business plan and dashboard generated.";
+    } else {
+      latestOperator = null;
+      dashboard.classList.add("hidden");
+      statusBox.textContent =
+        "A strategy was generated, but the full operator data was missing. Check the backend response.";
+      if (typeof data.text === "string") {
+        const fallback = document.createElement("pre");
+        fallback.style.whiteSpace = "pre-wrap";
+        fallback.textContent = data.text;
+        statusBox.appendChild(fallback);
+      }
+    }
+  } catch (error) {
+    statusBox.textContent = error.message || "Something went wrong. Try again.";
+    statusBox.className = "status error";
+  } finally {
+    generateButton.disabled = false;
+    generateButton.textContent = "Build My Business";
+  }
+});
+
+document.getElementById("copyButton").addEventListener("click", event => {
+  if (latestOperator) copyText(summaryText(latestOperator), event.currentTarget);
+});
+
+document.getElementById("copyFullButton").addEventListener("click", event => {
+  if (latestOperator) copyText(fullPlanText(latestOperator), event.currentTarget);
+});
+</script>
 </body>
 </html>
