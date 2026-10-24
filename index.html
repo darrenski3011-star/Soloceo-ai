@@ -542,7 +542,7 @@ form.addEventListener("submit", async event => {
   dashboard.classList.add("hidden");
 
   try {
-    const response = await fetch("/api/generate", {
+    const response = await fetch("/api/build", { 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
