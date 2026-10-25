@@ -581,13 +581,22 @@ form.addEventListener("submit", async event => {
         statusBox.appendChild(fallback);
       }
     }
-  } catch (error) {
-    statusBox.textContent =
-  error?.message ||
-  (typeof error === "string" ? error : JSON.stringify(error)) ||
-  "Something went wrong. Try again.";
-    statusBox.className = "status error";
-  } finally {
+} catch (error) {
+  console.error("Soloco AI error:", error);
+
+  statusBox.replaceChildren();
+
+  const message = document.createElement("pre");
+  message.style.whiteSpace = "pre-wrap";
+  message.style.overflowWrap = "anywhere";
+  message.textContent =
+    error?.message ||
+    (typeof error === "string" ? error : JSON.stringify(error, null, 2)) ||
+    "Unknown error";
+
+  statusBox.appendChild(message);
+  statusBox.className = "status error";
+} finally {
     generateButton.disabled = false;
     generateButton.textContent = "Build My Business";
   }
