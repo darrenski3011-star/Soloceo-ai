@@ -1,4 +1,4 @@
-
+q
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -168,8 +168,9 @@ anything, or completed external actions.
 
   if (!geminiResponse.ok) {
     const providerMessage =
-      result?.error?.message || "No detailed error message was provided.";
-
+  typeof result?.error?.message === "string"
+    ? result.error.message
+    : JSON.stringify(result?.error || result);
     // Log the provider error, but never log the API key.
     console.error(
       "Gemini API error:",
