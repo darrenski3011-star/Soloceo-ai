@@ -538,7 +538,18 @@ form.addEventListener("submit", async event => {
   generateButton.disabled = true;
   generateButton.textContent = "Building your business...";
   statusBox.className = "status";
-  statusBox.textContent = "Generating your plan and business assets...";
+  } catch (error) {
+  let details = "Unknown error";
+
+  try {
+    details = JSON.stringify(error, Object.getOwnPropertyNames(error), 2);
+  } catch {
+    details = String(error);
+  }
+
+  statusBox.textContent = "ERROR DETAILS:\n" + details;
+  statusBox.className = "status error";
+  console.error("Soloco AI error details:", error);
   dashboard.classList.add("hidden");
 
   try {
