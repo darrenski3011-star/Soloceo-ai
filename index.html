@@ -582,7 +582,10 @@ form.addEventListener("submit", async event => {
       }
     }
   } catch (error) {
-    statusBox.textContent = error.message || "Something went wrong. Try again.";
+    statusBox.textContent =
+  error?.message ||
+  (typeof error === "string" ? error : JSON.stringify(error)) ||
+  "Something went wrong. Try again.";
     statusBox.className = "status error";
   } finally {
     generateButton.disabled = false;
