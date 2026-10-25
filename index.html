@@ -539,27 +539,344 @@ form.addEventListener("submit", async event => {
   generateButton.textContent = "Building your business...";
   statusBox.className = "status";
   } catch (error) {
-  let details = "Unknown error";
+<script>
+const form = document.getElementById("businessForm");
+const generateButton = document.getElementById("generateButton");
+const statusBox = document.getElementById("status");
+const dashboard = document.getElementById("dashboard");
 
-  try {
-    details = JSON.stringify(error, Object.getOwnPropertyNames(error), 2);
-  } catch {
-    details = String(error);
+let latestOperator = null;
+let completedTasks = new Set();
+let approvalDecisions = {};
+
+function setText(id, value) {
+  document.getElementById(id).textContent =
+    value == null || value === ""
+      ? "Not provided."
+      : typeof value === "object"
+        ? JSON.stringify(value, null, 2)
+        : String(value);
+}
+
+function addText(parent, tag, value, className) {
+  const element = document.createElement(tag);
+
+  element.textContent =
+    value == null
+      ? ""
+      : typeof value === "object"
+        ? JSON.stringify(value, null, 2)
+        : String(value);
+
+  if (className) element.className = className;
+  parent.appendChild(element);
+  return element;
+}
+
+function renderList(containerId, items, renderItem) {
+  const container = document.getElementById(containerId);
+  container.replaceChildren();
+
+  if (!Array.isArray(items) || items.length === 0) {
+    addText(container, "p", "No items were generated.");
+    return;
   }
 
-  statusBox.textContent = "ERROR DETAILS:\n" + details;
-  statusBox.className = "status error";
-  console.error("Soloco AI error details:", error);
+  items.forEach((item, index) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "item";
+    renderItem(wrapper, item, index);
+    container.appendChild(wrapper);
+  });
+}
+
+function renderTasks(tasks) {
+  renderList("tasks", tasks, (wrapper, task, index) => {
+    task = task && typeof task === "object" ? task : {};
+
+    const taskId = String(task.id ?? `task-${index}`);
+    const label = document.createElement("label");
+    label.style.margin = "0";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "task-check";
+    checkbox.checked = completedTasks.has(taskId);
+
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        completedTasks.add(taskId);
+      } else {
+        completedTasks.delete(taskId);
+      }
+
+      updateTaskProgress(tasks);
+    });
+
+    label.appendChild(checkbox);
+    label.appendChild(
+      document.createTextNode(task.title || `Task ${index + 1}`)
+    );
+
+    wrapper.appendChild(label);
+    addText(wrapper, "p", task.description || "");
+    addText(wrapper, "span", task.actionType || "task", "tag");
+
+    if (task.requiresApproval) {
+      addText(
+        wrapper,
+        "p",
+        "Requires human approval before execution.",
+        "small"
+      );
+    }
+  });
+
+  updateTaskProgress(tasks);
+}
+
+function updateTaskProgress(tasks) {
+  const total = Array.isArray(tasks) ? tasks.length : 0;
+  const done = Array.isArray(tasks)
+    ? tasks.filter((task, index) =>
+        completedTasks.has(String(task?.id ?? `task-${index}`))
+      ).length
+    : 0;
+
+  setText("taskProgress", `${done} of ${total} tasks checked complete`);
+}
+
+function renderAssets(assets) {
+  const container = document.getElementById("assets");
+  container.replaceChildren();
+
+  if (!Array.isArray(assets) || assets.length === 0) {
+    addText(container, "p", "No individual business assets were returned.");
+    return;
+  }
+
+  assets.forEach((asset, index) => {
+    asset = asset && typeof asset === "object" ? asset : {};
+
+    const card = document.createElement("article");
+    card.className = "card";
+
+    addText(card, "span", asset.type || "business asset", "tag");
+    addText(card, "h3", asset.title || `Asset ${index + 1}`);
+
+    const content = addText(
+      card,
+      "div",
+      asset.content ?? "No content provided.",
+      "asset-content"
+    );
+
+    const copy = document.createElement("button");
+    copy.className = "secondary";
+    copy.type = "button";
+    copy.textContent = "Copy Asset";
+
+    copy.addEventListener("click", () => {
+      copyText(content.textContent, copy);
+    });
+
+    card.appendChild(copy);
+    container.appendChild(card);
+  });
+}
+
+function renderApprovals(items) {
+  renderList("approvals", items, (wrapper, item, index) => {
+    item = item && typeof item === "object" ? item : {};
+
+    const itemId = String(item.id ?? `approval-${index}`);
+
+    addText(wrapper, "h3", item.title || `Approval ${index + 1}`);
+    addText(wrapper, "p", item.description || "");
+
+    const statusTag = addText(
+      wrapper,
+      "span",
+      approvalDecisions[itemId] || item.status || "awaiting_approval",
+      "tag"
+    );
+
+    const note = addText(
+      wrapper,
+      "p",
+      "This records your decision locally. It does not execute the action.",
+      "small"
+    );
+
+    const controls = document.createElement("div");
+    controls.style.display = "flex";
+    controls.style.flexWrap = "wrap";
+    controls.style.gap = "8px";
+
+    ["Approve", "Reject"].forEach(choice => {
+      const button = document.createElement("button");
+      button.className = "secondary";
+      button.type = "button";
+      button.textContent = choice;
+
+      button.addEventListener("click", () => {
+        approvalDecisions[itemId] =
+          choice === "Approve"
+            ? "approved_locally"
+            : "rejected_locally";
+
+        statusTag.textContent = approvalDecisions[itemId];
+        note.textContent =
+          "Decision recorded in this browser only. No external action was performed.";
+      });
+
+      controls.appendChild(button);
+    });
+
+    wrapper.appendChild(controls);
+  });
+}
+
+function renderOperator(operator) {
+  if (!operator || typeof operator !== "object" || Array.isArray(operator)) {
+    throw new Error("The server returned invalid business operator data.");
+  }
+
+  latestOperator = operator;
+  completedTasks = new Set();
+  approvalDecisions = {};
+
+  setText("businessName", operator.businessName);
+  setText("businessModel", operator.businessModel);
+  setText("targetCustomer", operator.targetCustomer);
+  setText("offer", operator.offer);
+  setText("pricing", operator.pricingHypothesis);
+  setText("recurring", operator.recurringRevenuePlan);
+  setText("nextAction", operator.nextAction);
+
+  renderList("priorities", operator.priorities, (wrapper, item, index) => {
+    item = item && typeof item === "object" ? item : {};
+
+    addText(
+      wrapper,
+      "h3",
+      `${index + 1}. ${item.title || "Priority"}`
+    );
+
+    addText(wrapper, "p", item.reason || "");
+  });
+
+  const tasks = Array.isArray(operator.tasks) ? operator.tasks : [];
+  renderTasks(tasks);
+
+  renderAssets(operator.assets || []);
+  renderApprovals(operator.approvalQueue || []);
+
+  const metrics = document.getElementById("metrics");
+  metrics.replaceChildren();
+
+  const metricItems = Array.isArray(operator.metrics)
+    ? operator.metrics
+    : [];
+
+  metricItems.forEach(metric => {
+    metric = metric && typeof metric === "object" ? metric : {};
+
+    const card = document.createElement("article");
+    card.className = "card";
+
+    addText(card, "h3", metric.name || "Metric");
+    addText(card, "p", `Target: ${metric.target || "To be defined"}`);
+    addText(
+      card,
+      "p",
+      `Measurement: ${metric.measurement || "To be defined"}`
+    );
+
+    metrics.appendChild(card);
+  });
+
+  if (metricItems.length === 0) {
+    addText(metrics, "p", "No metrics returned.");
+  }
+
+  renderList("assumptions", operator.assumptions, (wrapper, item) => {
+    addText(wrapper, "p", item);
+  });
+
+  dashboard.classList.remove("hidden");
+  dashboard.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function summaryText(operator) {
+  return [
+    `BUSINESS: ${operator.businessName || ""}`,
+    `MODEL: ${operator.businessModel || ""}`,
+    `TARGET CUSTOMER: ${operator.targetCustomer || ""}`,
+    `OFFER: ${operator.offer || ""}`,
+    `PRICING: ${operator.pricingHypothesis || ""}`,
+    `RECURRING REVENUE: ${operator.recurringRevenuePlan || ""}`,
+    `NEXT ACTION: ${operator.nextAction || ""}`
+  ].join("\n\n");
+}
+
+function fullPlanText(operator) {
+  return JSON.stringify(operator, null, 2);
+}
+
+async function copyText(text, button) {
+  try {
+    await navigator.clipboard.writeText(text);
+
+    const oldText = button.textContent;
+    button.textContent = "Copied!";
+
+    setTimeout(() => {
+      button.textContent = oldText;
+    }, 1800);
+  } catch (error) {
+    statusBox.textContent =
+      "Clipboard access is unavailable. Select and copy the text manually.";
+    statusBox.className = "status error";
+  }
+}
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const business = document.getElementById("business").value.trim();
+  const skills = document.getElementById("skills").value.trim();
+  const budget = document.getElementById("budget").value;
+  const goal = document.getElementById("goal").value;
+
+  if (!business) {
+    statusBox.textContent = "Describe the business first.";
+    statusBox.className = "status error";
+    return;
+  }
+
+  generateButton.disabled = true;
+  generateButton.textContent = "Building your business...";
+  statusBox.textContent = "Connecting to the AI business operator...";
+  statusBox.className = "status";
   dashboard.classList.add("hidden");
 
   try {
-    const response = await fetch("/api/build", { 
+    const response = await fetch("/api/build", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json"
       },
-      body: JSON.stringify({ business, skills, budget, goal })
+      body: JSON.stringify({
+        business,
+        skills,
+        budget,
+        goal
+      })
     });
 
     const responseText = await response.text();
@@ -568,58 +885,69 @@ form.addEventListener("submit", async event => {
     try {
       data = JSON.parse(responseText);
     } catch {
+      const preview = responseText.slice(0, 1000);
+
       throw new Error(
-        "The server returned a non-JSON response. Check the Vercel deployment and API route."
+        `The server returned a non-JSON response (HTTP ${response.status}). ` +
+        `Check the Vercel API route and deployment.\n\nResponse:\n${preview}`
       );
     }
 
     if (!response.ok) {
-      throw new Error(data.error || `Request failed: ${response.status}`);
+      let detail;
+
+      if (typeof data?.error === "string") {
+        detail = data.error;
+      } else if (data?.error?.message) {
+        detail = data.error.message;
+      } else {
+        detail = JSON.stringify(data?.error ?? data, null, 2);
+      }
+
+      throw new Error(`HTTP ${response.status}: ${detail}`);
     }
 
     if (data.operator && typeof data.operator === "object") {
       renderOperator(data.operator);
-      statusBox.textContent = "Business plan and dashboard generated.";
+      statusBox.textContent = "Business operator dashboard generated.";
     } else {
       latestOperator = null;
-      dashboard.classList.add("hidden");
-      statusBox.textContent =
-        "A strategy was generated, but the full operator data was missing. Check the backend response.";
-      if (typeof data.text === "string") {
-        const fallback = document.createElement("pre");
-        fallback.style.whiteSpace = "pre-wrap";
-        fallback.textContent = data.text;
-        statusBox.appendChild(fallback);
-      }
+
+      const detail =
+        typeof data.error === "string"
+          ? data.error
+          : JSON.stringify(data, null, 2);
+
+      throw new Error(
+        "The server responded, but the operator data is missing.\n\n" +
+        detail
+      );
     }
-} catch (error) {
-  console.error("Soloco AI error:", error);
+  } catch (error) {
+    console.error("Soloco AI error:", error);
 
-  statusBox.replaceChildren();
+    const details =
+      error instanceof Error
+        ? error.message
+        : JSON.stringify(error, null, 2);
 
-  const message = document.createElement("pre");
-  message.style.whiteSpace = "pre-wrap";
-  message.style.overflowWrap = "anywhere";
-  message.textContent =
-    error?.message ||
-    (typeof error === "string" ? error : JSON.stringify(error, null, 2)) ||
-    "Unknown error";
-
-  statusBox.appendChild(message);
-  statusBox.className = "status error";
-} finally {
+    statusBox.textContent = "ERROR DETAILS:\n" + details;
+    statusBox.className = "status error";
+  } finally {
     generateButton.disabled = false;
     generateButton.textContent = "Build My Business";
   }
 });
 
 document.getElementById("copyButton").addEventListener("click", event => {
-  if (latestOperator) copyText(summaryText(latestOperator), event.currentTarget);
+  if (latestOperator) {
+    copyText(summaryText(latestOperator), event.currentTarget);
+  }
 });
 
 document.getElementById("copyFullButton").addEventListener("click", event => {
-  if (latestOperator) copyText(fullPlanText(latestOperator), event.currentTarget);
+  if (latestOperator) {
+    copyText(fullPlanText(latestOperator), event.currentTarget);
+  }
 });
 </script>
-</body>
-</html>
