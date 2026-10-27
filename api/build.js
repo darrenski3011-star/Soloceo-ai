@@ -95,7 +95,17 @@ Use these fields:
 Limit priorities to 3, tasks to 5, and assets to 3.
 `;
 
-    const model = gemini-4-argon;;
+    const model = const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({
+      success: false,
+      error: "GEMINI_API_KEY is missing in Vercel Environment Variables."
+    });
+  }
+
+  try {
+    const body = req.body || {};
     const url =
       "https://generativelanguage.googleapis.com/v1beta/models/" +
       model +
