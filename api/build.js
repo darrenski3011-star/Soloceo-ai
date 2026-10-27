@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (!apiKey) {
     return res.status(500).json({
       success: false,
-      error: "Missing GEMINI_API_KEY. Add it to your deployment environment variables."
+      error: "GEMINI_API_KEY is missing from Vercel Environment Variables."
     });
   }
 
@@ -24,57 +24,44 @@ export default async function handler(req, res) {
 
     const business = String(
       body.business || body.idea || body.businessIdea || ""
-    ).trim().slice(0, 2000);
+    ).trim().slice(0, 1500);
 
     const skills = String(body.skills || "")
-      .trim().slice(0, 1500);
+      .trim()
+      .slice(0, 800);
 
-    const budget = String(body.budget || "$0")
-      .trim().slice(0, 100);
-
-    const goal = String(body.goal || "Build recurring income")
-      .trim().slice(0, 200);
+    const budget = String(body.budget || "$0").slice(0, 100);
+    const goal = String(
+      body.goal || "Build recurring income"
+    ).slice(0, 200);
 
     if (!business) {
       return res.status(400).json({
         success: false,
-        error: "Describe the business you want Soloco AI to build."
+        error: "Enter a business idea first."
       });
     }
 
     const prompt = `
-You are Soloco AI, a practical AI business operator.
+You are Soloco AI, an AI business operator.
 
-Create a specific, realistic business launch plan.
+Create a practical business launch and operating blueprint.
+The user's budget is ${budget}.
+Business idea: ${business}
+Skills: ${skills || "Not specified"}
+Goal: ${goal}
 
-BUSINESS IDEA:
-${business}
+Important:
+- Start with actions possible at zero cost.
+- Never claim you performed an action you did not perform.
+- Do not invent customers, sales, revenue, or completed work.
+- Require approval before spending money, publishing content,
+  contacting people, or making commitments.
+- Focus on a realistic offer and recurring revenue.
+- Keep the response concise and specific.
+- Return ONLY valid JSON, with no markdown fences.
 
-SKILLS AND RESOURCES:
-${skills || "Not provided"}
-
-STARTUP BUDGET:
-${budget}
-
-MAIN GOAL:
-${goal}
-
-RULES:
-- Respect the stated budget.
-- For a $0 budget, prioritize genuinely free methods.
-- Do not assume paid tools, advertising, inventory, or contractors.
-- Explain how to get the first paying customer.
-- Include recurring revenue where appropriate.
-- Never guarantee income or success.
-- Separate estimates from verified facts.
-- Never claim you performed external actions.
-- Make the plan specific to this business.
-- All assets must be complete drafts ready for review.
-- External actions involving customers, public posts, money,
-  or accounts require human approval.
-- Return valid JSON only.
-
-Return an object with exactly these fields:
+Use this exact JSON structure:
 {
   "businessName": "string",
   "businessModel": "string",
@@ -83,65 +70,43 @@ Return an object with exactly these fields:
   "pricingHypothesis": "string",
   "recurringRevenuePlan": "string",
   "nextAction": "string",
-  "priorities": [
-    { "title": "string", "reason": "string" }
-  ],
+  "priorities": ["string"],
   "tasks": [
     {
-      "id": "task-1",
       "title": "string",
       "description": "string",
-      "actionType": "planning",
-      "requiresApproval": false
+      "status": "pending"
     }
   ],
   "assets": [
     {
-      "type": "sales",
       "title": "string",
       "content": "string"
     }
   ],
-  "approvalQueue": [
-    {
-      "id": "approval-1",
-      "title": "string",
-      "description": "string",
-      "status": "awaiting_approval"
-    }
-  ],
+  "approvalQueue": [],
   "metrics": [
     {
       "name": "string",
-      "target": "string",
-      "measurement": "string"
+      "value": "Not measured yet"
     }
   ],
   "assumptions": ["string"]
 }
 
-REQUIREMENTS:
-- 4 to 6 priorities.
-- 5 to 8 tasks in execution order.
-- Unique task IDs.
-- 3 to 5 useful business assets.
-- 2 to 4 approval items.
-- 3 to 5 measurable metrics.
-- 3 to 5 assumptions.
-- Make the first action achievable with the available resources.
-- Return all fields, using strings and arrays as specified.
+Limit tasks to 5, assets to 3, priorities to 3.
+Do not state that any external action has been completed.
 `;
 
-    const model = "gemini-3.8-flash";
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 50000);
 
-    const endpoint =
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    let response;
 
-    let lastError = "Unable to generate your business plan.";
-
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const response = await fetch(endpoint, {
+    try {
+      response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -155,203 +120,130 @@ REQUIREMENTS:
               }
             ],
             generationConfig: {
-              temperature: 0.3,
-              responseMimeType: "application/json",
-              maxOutputTokens: 4000
+              temperature: 0.4,
+              maxOutputTokens: 2500,
+              responseMimeType: "application/json"
             }
           }),
-          signal: AbortSignal.timeout(20000)
+          signal: controller.signal
+        }
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    const raw = await response.text();
+    let data;
+
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+      const apiMessage =
+        data?.error?.message || raw.slice(0, 500) ||
+        "No details supplied by Gemini.";
+
+      let message;
+
+      if (response.status === 429) {
+        message = "Gemini quota or rate limit reached. Check your API usage and billing.";
+      } else if (
+        response.status === 401 ||
+        response.status === 403
+      ) {
+        message = "Gemini rejected the API key. Check GEMINI_API_KEY and its permissions.";
+      } else if (response.status === 400) {
+        message = "Gemini rejected the request: " + apiMessage;
+      } else {
+        message = "Gemini API error (" +
+          response.status + "): " + apiMessage;
+      }
+
+      return res.status(502).json({
+        success: false,
+        error: message
+      });
+    }
+
+    const candidate = data?.candidates?.[0];
+    const text = candidate?.content?.parts
+      ?.map(part => part.text || "")
+      .join("")
+      .trim();
+
+    if (!text) {
+      return res.status(502).json({
+        success: false,
+        error: "Gemini returned no text. Try again with a shorter business idea."
+      });
+    }
+
+    let operator;
+
+    try {
+      operator = JSON.parse(text);
+    } catch {
+      const cleaned = text
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/, "")
+        .trim();
+
+      try {
+        operator = JSON.parse(cleaned);
+      } catch {
+        return res.status(502).json({
+          success: false,
+          error: "Gemini responded, but its result was not valid JSON. Please try again."
         });
-
-        const responseText = await response.text();
-
-        let data;
-
-        try {
-          data = JSON.parse(responseText);
-        } catch {
-          lastError = "Gemini returned an unreadable response.";
-
-          if (attempt < 1) continue;
-          break;
-        }
-
-        if (!response.ok) {
-          const status = response.status;
-          const message = data?.error?.message || "Unknown API error.";
-
-          console.error("Gemini API error:", status, message);
-
-          if (status === 429) {
-            lastError =
-              "Gemini quota or rate limit reached. Check your API quota and billing.";
-          } else if (status === 401 || status === 403) {
-            lastError =
-              "Gemini rejected the API key or access. Check your key and API permissions.";
-          } else if (status === 400) {
-            lastError = `Gemini rejected the request: ${message}`;
-          } else if (
-            [408, 500, 502, 503, 504].includes(status)
-          ) {
-            lastError = `Gemini server error (${status}): ${message}`;
-          } else {
-            lastError = `Gemini API error (${status}): ${message}`;
-          }
-
-          const retryable = [
-            408, 429, 500, 502, 503, 504
-          ].includes(status);
-
-          if (retryable && attempt < 1) {
-            await new Promise(resolve =>
-              setTimeout(resolve, 1000)
-            );
-            continue;
-          }
-
-          break;
-        }
-
-        const candidate = data?.candidates?.[0];
-
-        const generatedText = candidate?.content?.parts
-          ?.map(part => part.text || "")
-          .join("")
-          .trim();
-
-        if (!generatedText) {
-          lastError =
-            "Gemini returned no plan. Check the model response and try again.";
-          break;
-        }
-
-        let operator;
-
-        try {
-          const cleaned = generatedText
-            .replace(/^```(?:json)?\s*/i, "")
-            .replace(/\s*```$/i, "")
-            .trim();
-
-          operator = JSON.parse(cleaned);
-        } catch {
-          lastError =
-            "Gemini returned invalid JSON. Please try generating the plan again.";
-
-          if (attempt < 1) continue;
-          break;
-        }
-
-        if (
-          !operator ||
-          typeof operator !== "object" ||
-          Array.isArray(operator)
-        ) {
-          lastError = "Gemini returned an invalid business plan.";
-          break;
-        }
-
-        const stringFields = [
-          "businessName",
-          "businessModel",
-          "targetCustomer",
-          "offer",
-          "pricingHypothesis",
-          "recurringRevenuePlan",
-          "nextAction"
-        ];
-
-        for (const field of stringFields) {
-          if (typeof operator[field] !== "string") {
-            operator[field] = "";
-          }
-        }
-
-        const arrayFields = [
-          "priorities",
-          "tasks",
-          "assets",
-          "approvalQueue",
-          "metrics",
-          "assumptions"
-        ];
-
-        for (const field of arrayFields) {
-          if (!Array.isArray(operator[field])) {
-            operator[field] = [];
-          }
-        }
-
-        operator.priorities = operator.priorities.map(item => ({
-          title: String(item?.title || "Launch priority"),
-          reason: String(item?.reason || "")
-        }));
-
-        operator.tasks = operator.tasks.map((task, index) => ({
-          id: `task-${index + 1}`,
-          title: String(task?.title || `Task ${index + 1}`),
-          description: String(task?.description || ""),
-          actionType: String(task?.actionType || "planning"),
-          requiresApproval: task?.requiresApproval === true
-        }));
-
-        operator.assets = operator.assets.map(item => ({
-          type: String(item?.type || "sales"),
-          title: String(item?.title || "Business asset"),
-          content: String(item?.content || "")
-        }));
-
-        operator.approvalQueue = operator.approvalQueue.map(
-          (item, index) => ({
-            id: `approval-${index + 1}`,
-            title: String(item?.title || "Review proposed action"),
-            description: String(item?.description || ""),
-            status: "awaiting_approval"
-          })
-        );
-
-        operator.metrics = operator.metrics.map(item => ({
-          name: String(item?.name || "Business metric"),
-          target: String(item?.target || "To be defined"),
-          measurement: String(item?.measurement || "To be defined")
-        }));
-
-        operator.assumptions = operator.assumptions.map(item =>
-          typeof item === "string" ? item : JSON.stringify(item)
-        );
-
-        return res.status(200).json({
-          success: true,
-          operator
-        });
-
-      } catch (error) {
-        console.error("Soloco AI request failed:", error);
-
-        lastError = error?.name === "TimeoutError"
-          ? "Gemini timed out. Please try again."
-          : "Could not connect to Gemini. Check your deployment and try again.";
-
-        if (attempt < 1) {
-          await new Promise(resolve =>
-            setTimeout(resolve, 1000)
-          );
-          continue;
-        }
       }
     }
 
-    return res.status(502).json({
-      success: false,
-      error: lastError
+    if (
+      !operator ||
+      typeof operator !== "object" ||
+      Array.isArray(operator)
+    ) {
+      return res.status(502).json({
+        success: false,
+        error: "Gemini returned an unexpected response format."
+      });
+    }
+
+    operator.priorities = Array.isArray(operator.priorities)
+      ? operator.priorities : [];
+    operator.tasks = Array.isArray(operator.tasks)
+      ? operator.tasks : [];
+    operator.assets = Array.isArray(operator.assets)
+      ? operator.assets : [];
+    operator.approvalQueue = Array.isArray(operator.approvalQueue)
+      ? operator.approvalQueue : [];
+    operator.metrics = Array.isArray(operator.metrics)
+      ? operator.metrics : [];
+    operator.assumptions = Array.isArray(operator.assumptions)
+      ? operator.assumptions : [];
+
+    return res.status(200).json({
+      success: true,
+      operator
     });
 
   } catch (error) {
-    console.error("Soloco AI backend error:", error);
+    console.error("Soloco build error:", error);
+
+    if (error?.name === "AbortError") {
+      return res.status(504).json({
+        success: false,
+        error: "Gemini took too long to respond. Vercel may be ending the request early. Check the function timeout and deployment logs."
+      });
+    }
 
     return res.status(500).json({
       success: false,
-      error: "Unexpected server error. Check your deployment logs."
+      error: "Backend error: " +
+        (error?.message || "Unknown server error")
     });
   }
 }
