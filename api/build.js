@@ -95,7 +95,7 @@ Use these fields:
 Limit priorities to 3, tasks to 5, and assets to 3.
 `;
 
-    const model = "gemini-3.6-flash";;
+    const model = gemini-4-argon;;
     const url =
       "https://generativelanguage.googleapis.com/v1beta/models/" +
       model +
