@@ -160,7 +160,7 @@ REQUIREMENTS:
               maxOutputTokens: 4000
             }
           }),
-          signal: AbortSignal.timeout(22000)
+          signal: AbortSignal.timeout(20000)
         });
 
         const responseText = await response.text();
@@ -172,7 +172,7 @@ REQUIREMENTS:
         } catch {
           lastError = "Gemini returned an unreadable response.";
 
-          if (attempt < 2) continue;
+          if (attempt < 1) continue;
           break;
         }
 
@@ -181,7 +181,7 @@ REQUIREMENTS:
           const message = data?.error?.message || "Unknown API error.";
 
           console.error("Gemini API error:", status, message);
-          console.error("Gemini response details:", JSON.stringify(data));
+
           if (status === 429) {
             lastError =
               "Gemini quota or rate limit reached. Check your API quota and billing.";
@@ -191,15 +191,9 @@ REQUIREMENTS:
           } else if (status === 400) {
             lastError = `Gemini rejected the request: ${message}`;
           } else if (
-  status === 408 ||
-  status === 500 ||
-  status === 502 ||
-  status === 503 ||
-  status === 504
-) {
-  lastError = `Gemini server error (${status}): ${message}`;
-}
-            lastError = "Gemini is temporarily unavailable. Try again shortly.";
+            [408, 500, 502, 503, 504].includes(status)
+          ) {
+            lastError = `Gemini server error (${status}): ${message}`;
           } else {
             lastError = `Gemini API error (${status}): ${message}`;
           }
@@ -208,9 +202,9 @@ REQUIREMENTS:
             408, 429, 500, 502, 503, 504
           ].includes(status);
 
-          if (retryable && attempt < 2) {
+          if (retryable && attempt < 1) {
             await new Promise(resolve =>
-              setTimeout(resolve, 1000 * (attempt + 1))
+              setTimeout(resolve, 1000)
             );
             continue;
           }
@@ -244,7 +238,7 @@ REQUIREMENTS:
           lastError =
             "Gemini returned invalid JSON. Please try generating the plan again.";
 
-          if (attempt < 2) continue;
+          if (attempt < 1) continue;
           break;
         }
 
@@ -338,9 +332,9 @@ REQUIREMENTS:
           ? "Gemini timed out. Please try again."
           : "Could not connect to Gemini. Check your deployment and try again.";
 
-        if (attempt < 2) {
+        if (attempt < 1) {
           await new Promise(resolve =>
-            setTimeout(resolve, 1000 * (attempt + 1))
+            setTimeout(resolve, 1000)
           );
           continue;
         }
