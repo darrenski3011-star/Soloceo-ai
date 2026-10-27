@@ -191,12 +191,14 @@ REQUIREMENTS:
           } else if (status === 400) {
             lastError = `Gemini rejected the request: ${message}`;
           } else if (
-            status === 408 ||
-            status === 500 ||
-            status === 502 ||
-            status === 503 ||
-            status === 504
-          ) {
+  status === 408 ||
+  status === 500 ||
+  status === 502 ||
+  status === 503 ||
+  status === 504
+) {
+  lastError = `Gemini server error (${status}): ${message}`;
+}
             lastError = "Gemini is temporarily unavailable. Try again shortly.";
           } else {
             lastError = `Gemini API error (${status}): ${message}`;
