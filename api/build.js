@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (!apiKey) {
     return res.status(500).json({
       success: false,
-      error: "GEMINI_API_KEY is missing in Vercel Environment Variables."
+      error: "GEMINI_API_KEY is missing in Vercel."
     });
   }
 
@@ -26,8 +26,11 @@ export default async function handler(req, res) {
       body.business || body.idea || body.businessIdea || ""
     ).trim().slice(0, 1500);
 
-    const skills = String(body.skills || "").trim().slice(0, 800);
+    const skills = String(body.skills || "")
+      .trim().slice(0, 800);
+
     const budget = String(body.budget || "$0").slice(0, 100);
+
     const goal = String(
       body.goal || "Build recurring income"
     ).slice(0, 200);
@@ -49,17 +52,17 @@ Skills: ${skills || "Not specified"}
 Budget: ${budget}
 Goal: ${goal}
 
-Rules:
+Requirements:
 - Prioritize free tools and actions.
 - Focus on a real offer and recurring income.
 - Never invent customers, sales, or revenue.
-- Do not claim to have performed external actions.
-- Require approval before spending money, publishing,
-  contacting people, or making commitments.
-- Keep the response concise.
+- Do not claim actions have been performed.
+- Require user approval before spending money,
+  publishing, contacting people, or making commitments.
 - Return only valid JSON, without markdown.
+- Keep the result concise.
 
-Use these fields:
+Return these fields:
 {
   "businessName": "string",
   "businessModel": "string",
@@ -95,17 +98,9 @@ Use these fields:
 Limit priorities to 3, tasks to 5, and assets to 3.
 `;
 
-    const model = const apiKey = process.env.GEMINI_API_KEY;
+    // Use the model configured for this request.
+    const model = "gemini-3.8-flash";
 
-  if (!apiKey) {
-    return res.status(500).json({
-      success: false,
-      error: "GEMINI_API_KEY is missing in Vercel Environment Variables."
-    });
-  }
-
-  try {
-    const body = req.body || {};
     const url =
       "https://generativelanguage.googleapis.com/v1beta/models/" +
       model +
@@ -113,11 +108,13 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 
     let lastError = "Gemini did not return a response.";
 
+    // Retry once for temporary failures.
     for (let attempt = 0; attempt < 2; attempt++) {
       const controller = new AbortController();
+
       const timer = setTimeout(
         () => controller.abort(),
-        45000
+        20000
       );
 
       let response;
@@ -139,7 +136,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
             ],
             generationConfig: {
               temperature: 0.4,
-              maxOutputTokens: 2200,
+              maxOutputTokens: 1800,
               responseMimeType: "application/json"
             }
           }),
@@ -150,11 +147,13 @@ Limit priorities to 3, tasks to 5, and assets to 3.
       } catch (error) {
         lastError =
           error.name === "AbortError"
-            ? "Gemini request timed out."
+            ? "Gemini request timed out. Please try again."
             : "Network error: " + error.message;
 
         if (attempt === 0) {
-          await new Promise(resolve => setTimeout(resolve, 1200));
+          await new Promise(resolve =>
+            setTimeout(resolve, 1500)
+          );
           continue;
         }
 
@@ -189,7 +188,9 @@ Limit priorities to 3, tasks to 5, and assets to 3.
         ].includes(response.status);
 
         if (retryable && attempt === 0) {
-          await new Promise(resolve => setTimeout(resolve, 1200));
+          await new Promise(resolve =>
+            setTimeout(resolve, 1500)
+          );
           continue;
         }
 
@@ -199,17 +200,20 @@ Limit priorities to 3, tasks to 5, and assets to 3.
         });
       }
 
-      const text = data?.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || "")
-        .join("")
-        .trim();
+      const generatedText =
+        data?.candidates?.[0]?.content?.parts
+          ?.map(part => part.text || "")
+          .join("")
+          .trim();
 
-      if (!text) {
+      if (!generatedText) {
         lastError =
-          "Gemini returned an empty response. Try again.";
+          "Gemini returned an empty response. Please try again.";
 
         if (attempt === 0) {
-          await new Promise(resolve => setTimeout(resolve, 1200));
+          await new Promise(resolve =>
+            setTimeout(resolve, 1000)
+          );
           continue;
         }
 
@@ -222,7 +226,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
       let operator;
 
       try {
-        operator = JSON.parse(text);
+        operator = JSON.parse(generatedText);
       } catch {
         return res.status(502).json({
           success: false,
@@ -241,23 +245,29 @@ Limit priorities to 3, tasks to 5, and assets to 3.
         });
       }
 
-      operator.priorities = Array.isArray(operator.priorities)
-        ? operator.priorities : [];
+      operator.priorities =
+        Array.isArray(operator.priorities)
+          ? operator.priorities : [];
 
-      operator.tasks = Array.isArray(operator.tasks)
-        ? operator.tasks : [];
+      operator.tasks =
+        Array.isArray(operator.tasks)
+          ? operator.tasks : [];
 
-      operator.assets = Array.isArray(operator.assets)
-        ? operator.assets : [];
+      operator.assets =
+        Array.isArray(operator.assets)
+          ? operator.assets : [];
 
-      operator.approvalQueue = Array.isArray(operator.approvalQueue)
-        ? operator.approvalQueue : [];
+      operator.approvalQueue =
+        Array.isArray(operator.approvalQueue)
+          ? operator.approvalQueue : [];
 
-      operator.metrics = Array.isArray(operator.metrics)
-        ? operator.metrics : [];
+      operator.metrics =
+        Array.isArray(operator.metrics)
+          ? operator.metrics : [];
 
-      operator.assumptions = Array.isArray(operator.assumptions)
-        ? operator.assumptions : [];
+      operator.assumptions =
+        Array.isArray(operator.assumptions)
+          ? operator.assumptions : [];
 
       return res.status(200).json({
         success: true,
@@ -274,7 +284,8 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 
     return res.status(500).json({
       success: false,
-      error: "Backend error: " +
+      error:
+        "Backend error: " +
         (error.message || "Unknown error")
     });
   }
