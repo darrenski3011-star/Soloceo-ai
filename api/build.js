@@ -139,7 +139,7 @@ REQUIREMENTS:
 
     let lastError = "Unable to generate your business plan.";
 
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const response = await fetch(endpoint, {
           method: "POST",
@@ -157,10 +157,10 @@ REQUIREMENTS:
             generationConfig: {
               temperature: 0.3,
               responseMimeType: "application/json",
-              maxOutputTokens: 8000
+              maxOutputTokens: 4000
             }
           }),
-          signal: AbortSignal.timeout(55000)
+          signal: AbortSignal.timeout(22000)
         });
 
         const responseText = await response.text();
