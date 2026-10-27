@@ -181,7 +181,7 @@ REQUIREMENTS:
           const message = data?.error?.message || "Unknown API error.";
 
           console.error("Gemini API error:", status, message);
-
+          console.error("Gemini response details:", JSON.stringify(data));
           if (status === 429) {
             lastError =
               "Gemini quota or rate limit reached. Check your API quota and billing.";
