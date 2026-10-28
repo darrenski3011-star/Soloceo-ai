@@ -152,7 +152,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 
         if (attempt === 0) {
           await new Promise(resolve =>
-            setTimeout(resolve, 1500)
+            setTimeout(resolve, 2000)
           );
           continue;
         }
