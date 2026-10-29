@@ -150,12 +150,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
             ? "Gemini request timed out. Please try again."
             : "Network error: " + error.message;
 
-        if (attempt === 0) {
-          await new Promise(resolve =>
-            setTimeout(resolve, 2000)
-          );
-          continue;
-        }
+       
 
         return res.status(502).json({
           success: false,
