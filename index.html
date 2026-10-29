@@ -417,5 +417,221 @@
     });
   })();
   </script>
+
+<style>
+  .acq-panel{margin:28px 0;padding:20px;border:1px solid #39ff14;border-radius:14px;background:#06140b;color:#eaffea}
+  .acq-panel h2,.acq-panel h3{color:#39ff14}
+  .acq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .acq-panel input,.acq-panel textarea,.acq-panel select{box-sizing:border-box;width:100%;padding:11px;margin:5px 0 12px;background:#0b2112;color:#fff;border:1px solid #32633c;border-radius:7px}
+  .acq-panel button,.acq-panel .acq-link{display:inline-block;padding:10px 14px;margin:4px 4px 8px 0;background:#39ff14;color:#031b0a;border:0;border-radius:7px;font-weight:bold;text-decoration:none;cursor:pointer}
+  .acq-card{padding:12px;margin:10px 0;border:1px solid #32633c;border-radius:9px;overflow-wrap:anywhere}
+  .acq-muted{color:#a9c5ad;font-size:13px}
+</style>
+
+<section class="acq-panel" id="customer-acquisition">
+  <h2>Customer Acquisition Engine</h2>
+  <p>Find potential customers, prepare outreach, and track prospects. Soloco AI will not contact anyone without your approval.</p>
+
+  <h3>1. Find potential customers</h3>
+  <div class="acq-grid">
+    <label>Service or product
+      <input id="acq-service" placeholder="e.g. handyman services">
+    </label>
+    <label>City or service area
+      <input id="acq-area" placeholder="e.g. Hawley, Minnesota">
+    </label>
+  </div>
+  <button type="button" id="acq-search">Create search links</button>
+  <div id="acq-links"></div>
+  <p class="acq-muted">These links open public search results. Verify each prospect before reaching out.</p>
+
+  <h3>2. Add a prospect</h3>
+  <div class="acq-grid">
+    <label>Name or business
+      <input id="acq-name" placeholder="Prospect name">
+    </label>
+    <label>Public contact details
+      <input id="acq-contact" placeholder="Website, public email, or phone">
+    </label>
+    <label>What they need
+      <input id="acq-need" placeholder="Describe the potential need">
+    </label>
+    <label>Where you found them
+      <input id="acq-source" placeholder="Website, search, referral">
+    </label>
+  </div>
+  <label>Notes
+    <textarea id="acq-notes" rows="2" placeholder="Relevant details"></textarea>
+  </label>
+  <button type="button" id="acq-save">Save prospect</button>
+
+  <h3>3. Prepare an outreach draft</h3>
+  <label>Choose a prospect
+    <select id="acq-select">
+      <option value="">Select a saved prospect</option>
+    </select>
+  </label>
+  <label>Draft message
+    <textarea id="acq-message" rows="5" placeholder="Your draft will appear here. Review it before sending."></textarea>
+  </label>
+  <button type="button" id="acq-draft">Prepare draft</button>
+  <button type="button" id="acq-copy">Copy draft</button>
+
+  <h3>4. Prospect pipeline</h3>
+  <div id="acq-pipeline"><p class="acq-muted">Your saved prospects will appear here.</p></div>
+  <p class="acq-muted">Prospects are stored in this browser on this device. This is a first version, not a cloud-synced CRM.</p>
+</section>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const storageKey = "solocoai_leads_v1";
+  let leads = [];
+
+  try {
+    leads = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    if (!Array.isArray(leads)) leads = [];
+  } catch (_) {
+    leads = [];
+  }
+
+  const escapeHTML = value => String(value || "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[c]));
+
+  function save() {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(leads));
+    } catch (_) {
+      alert("Could not save in this browser. Check browser storage settings.");
+    }
+    render();
+  }
+
+  function render() {
+    const select = $("acq-select");
+    const previous = select.value;
+    select.innerHTML = '<option value="">Select a saved prospect</option>' +
+      leads.map((lead, i) =>
+        '<option value="' + i + '">' + escapeHTML(lead.name) + '</option>'
+      ).join("");
+    if (previous !== "" && leads[Number(previous)]) select.value = previous;
+
+    const pipeline = $("acq-pipeline");
+    if (!leads.length) {
+      pipeline.innerHTML = '<p class="acq-muted">No prospects saved yet.</p>';
+      return;
+    }
+
+    pipeline.innerHTML = leads.map((lead, i) =>
+      '<div class="acq-card">' +
+        '<strong>' + escapeHTML(lead.name) + '</strong>' +
+        '<p>' + escapeHTML(lead.need) + '</p>' +
+        '<p class="acq-muted">' + escapeHTML(lead.contact) +
+          (lead.source ? ' · Source: ' + escapeHTML(lead.source) : '') + '</p>' +
+        '<label>Status<select data-status="' + i + '">' +
+          ['New','Draft ready','Approved to contact','Contacted manually','Interested','Customer','Not a fit']
+            .map(s => '<option' + (lead.status === s ? ' selected' : '') + '>' + s + '</option>').join("") +
+        '</select></label>' +
+        '<button type="button" data-delete="' + i + '">Delete prospect</button>' +
+      '</div>'
+    ).join("");
+  }
+
+  $("acq-search").addEventListener("click", function () {
+    const service = $("acq-service").value.trim();
+    const area = $("acq-area").value.trim();
+    if (!service || !area) {
+      alert("Enter both a service and a city or service area.");
+      return;
+    }
+
+    const searches = [
+      ["Potential customers", service + " needed " + area],
+      ["Local businesses", service + " " + area + " businesses"],
+      ["Local community posts", site:".com " + service + " " + area]
+    ];
+
+    $("acq-links").innerHTML = searches.map(item =>
+      '<p><a class="acq-link" target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=' +
+      encodeURIComponent(item[1]) + '">' + escapeHTML(item[0]) + '</a></p>'
+    ).join("");
+  });
+
+  $("acq-save").addEventListener("click", function () {
+    const name = $("acq-name").value.trim();
+    if (!name) {
+      alert("Enter a prospect name or business.");
+      return;
+    }
+
+    leads.unshift({
+      name,
+      contact: $("acq-contact").value.trim(),
+      need: $("acq-need").value.trim(),
+      source: $("acq-source").value.trim(),
+      notes: $("acq-notes").value.trim(),
+      status: "New"
+    });
+
+    save();
+    ["acq-name","acq-contact","acq-need","acq-source","acq-notes"].forEach(id => $(id).value = "");
+  });
+
+  $("acq-pipeline").addEventListener("change", function (event) {
+    const index = event.target.dataset.status;
+    if (index !== undefined && leads[Number(index)]) {
+      leads[Number(index)].status = event.target.value;
+      try { localStorage.setItem(storageKey, JSON.stringify(leads)); } catch (_) {}
+    }
+  });
+
+  $("acq-pipeline").addEventListener("click", function (event) {
+    const index = event.target.dataset.delete;
+    if (index !== undefined) {
+      leads.splice(Number(index), 1);
+      save();
+    }
+  });
+
+  $("acq-draft").addEventListener("click", function () {
+    const index = $("acq-select").value;
+    if (index === "") {
+      alert("Select a saved prospect first.");
+      return;
+    }
+
+    const lead = leads[Number(index)];
+    $("acq-message").value =
+      "Hi " + lead.name + ",\n\n" +
+      "I'm reaching out about " + (lead.need || "a possible need for " + $("acq-service").value.trim()) +
+      ". I work in " + ($("acq-area").value.trim() || "your area") +
+      " and wanted to see if this is something you'd like help with.\n\n" +
+      "If you're interested, let me know and I can share more details.\n\nThank you!";
+    lead.status = "Draft ready";
+    save();
+    $("acq-select").value = index;
+  });
+
+  $("acq-copy").addEventListener("click", async function () {
+    const message = $("acq-message").value;
+    if (!message) {
+      alert("Prepare or write a draft first.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(message);
+      alert("Draft copied. Review it before sending.");
+    } catch (_) {
+      $("acq-message").focus();
+      $("acq-message").select();
+      alert("Select and copy the draft manually.");
+    }
+  });
+
+  render();
+})();
+</script>
+
 </body>
 </html>
