@@ -609,7 +609,32 @@ if (summary) {
     save();
     ["acq-name","acq-contact","acq-need","acq-source","acq-notes"].forEach(id => $(id).value = "");
   });
+$("acq-export").addEventListener("click", function () {
+  const columns = ["name", "contact", "need", "source", "notes", "status"];
 
+  const csvCell = value =>
+    '"' + String(value || "").replace(/"/g, '""') + '"';
+
+  const csv = [
+    columns.join(","),
+    ...leads.map(lead =>
+      columns.map(key => csvCell(lead[key])).join(",")
+    )
+  ].join("\r\n");
+
+  const blob = new Blob(["\uFEFF" + csv], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "soloco-ai-prospects.csv";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+});
   $("acq-pipeline").addEventListener("change", function (event) {
     const index = event.target.dataset.status;
     if (index !== undefined && leads[Number(index)]) {
