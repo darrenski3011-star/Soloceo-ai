@@ -114,7 +114,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 
       const timer = setTimeout(
         () => controller.abort(),
-        20000
+        30000
       );
 
       let response;
