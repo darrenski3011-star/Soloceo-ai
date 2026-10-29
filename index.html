@@ -550,7 +550,7 @@
       ["Potential customers", service + " needed " + area],
       ["Local businesses", service + " " + area + " businesses"],
       ["Local community posts", "site:reddit.com " + service + " " + area]
-
+];
     $("acq-links").innerHTML = searches.map(item =>
       '<p><a class="acq-link" target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=' +
       encodeURIComponent(item[1]) + '">' + escapeHTML(item[0]) + '</a></p>'
