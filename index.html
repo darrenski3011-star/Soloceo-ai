@@ -580,9 +580,18 @@ if (summary) {
     }
 
     const searches = [
-      ["Potential customers", service + " needed " + area],
-      ["Local businesses", service + " " + area + " businesses"],
-      ["Local community posts", "site:reddit.com " + service + " " + area]
+  ["People needing this service",
+    '"' + service + '" needed "' + area + '"'],
+  ["Local businesses",
+    service + " businesses in " + area],
+  ["Google Maps listings",
+    service + " near " + area],
+  ["Reddit requests",
+    'site:reddit.com "' + service + '" "' + area + '"'],
+  ["Facebook public results",
+    'site:facebook.com "' + service + '" "' + area + '"'],
+  ["Local classifieds",
+    service + " wanted " + area]
 ];
     $("acq-links").innerHTML = searches.map(item =>
       '<p><a class="acq-link" target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=' +
