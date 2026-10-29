@@ -492,6 +492,9 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
   <button type="button" id="acq-copy">Copy draft</button>
 
   <h3>4. Prospect pipeline</h3>
+<div id="acq-summary" class="acq-grid"></div>
+<button type="button" id="acq-export">Export prospects backup (CSV)</button>
+<div id="acq-pipeline"><p class="acq-muted">Your saved prospects will appear here.</p></div>
   <div id="acq-pipeline"><p class="acq-muted">Your saved prospects will appear here.</p></div>
   <p class="acq-muted">Prospects are stored in this browser on this device. This is a first version, not a cloud-synced CRM.</p>
 </section>
@@ -532,6 +535,22 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
     if (previous !== "" && leads[Number(previous)]) select.value = previous;
 
     const pipeline = $("acq-pipeline");
+    const summary = $("acq-summary");
+
+if (summary) {
+  summary.innerHTML = [
+    ["Total prospects", leads.length],
+    ["Interested", leads.filter(x => x.status === "Interested").length],
+    ["Customers", leads.filter(x => x.status === "Customer").length],
+    ["Needs follow-up", leads.filter(x =>
+      ["New", "Draft ready", "Contacted manually"].includes(x.status)
+    ).length]
+  ].map(item =>
+    '<div class="acq-card"><strong>' + item[1] +
+    '</strong><p class="acq-muted">' + item[0] +
+    '</p></div>'
+  ).join("");
+}
     if (!leads.length) {
       pipeline.innerHTML = '<p class="acq-muted">No prospects saved yet.</p>';
       return;
