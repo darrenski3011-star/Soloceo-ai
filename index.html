@@ -330,7 +330,21 @@
       renderAssets(operator.assets);
       renderApprovals(operator.approvalQueue || operator.approvals);
       renderList("metrics", operator.metrics, "name");
-      renderList("assumptions", operator.assumptions, "assumption");
+      renderList("assumptions", operator.assumptions, "assumption");// Connect the generated business to customer acquisition.
+const acquisitionService = document.getElementById("acq-service");
+const acquisitionArea = document.getElementById("acq-area");
+
+if (acquisitionService && !acquisitionService.value.trim()) {
+  acquisitionService.value =
+    operator.offer ||
+    operator.businessName ||
+    operator.businessModel ||
+    "";
+}
+
+if (acquisitionArea && !acquisitionArea.value.trim()) {
+  acquisitionArea.value = "Hawley, Minnesota";
+}
       dashboard.classList.remove("hidden");
       dashboard.scrollIntoView({ behavior: "smooth", block: "start" });
     }
