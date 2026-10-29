@@ -136,7 +136,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
             ],
             generationConfig: {
               temperature: 0.4,
-              maxOutputTokens: 1800,
+              maxOutputTokens: 1200,
               responseMimeType: "application/json"
             }
           }),
