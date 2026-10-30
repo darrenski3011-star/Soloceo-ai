@@ -117,10 +117,10 @@ Limit priorities to 3, tasks to 5, and assets to 3.
         20000
       );
 
-      let response;
+            let response;
       let raw = "";
 
-      try       try {
+      try {
         response = await fetch(url, {
           method: "POST",
           headers: {
@@ -159,50 +159,6 @@ Limit priorities to 3, tasks to 5, and assets to 3.
           success: false,
           error: lastError
         });
-      } finally {
-        clearTimeout(timer);
-      }
-        response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: prompt }]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.4,
-              maxOutputTokens: 1200,
-              responseMimeType: "application/json"
-            }
-          }),
-          signal: controller.signal
-        });
-
-        raw = await response.text();
-            } catch (error) {
-        console.error("Soloco Gemini request failed:", {
-          name: error.name,
-          message: error.message
-        });
-
-        lastError =
-          error.name === "AbortError"
-            ? "Gemini request timed out. Please try again."
-            : "Network error: " + error.message;
-
-        return res.status(502).json({
-          success: false,
-          error: lastError
-        });
-      } finally {
-        clearTimeout(timer);
-      }
       } finally {
         clearTimeout(timer);
       }
