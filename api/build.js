@@ -144,18 +144,24 @@ Limit priorities to 3, tasks to 5, and assets to 3.
         });
 
         raw = await response.text();
-      } catch (error) {
+            } catch (error) {
+        console.error("Soloco Gemini request failed:", {
+          name: error.name,
+          message: error.message
+        });
+
         lastError =
           error.name === "AbortError"
             ? "Gemini request timed out. Please try again."
             : "Network error: " + error.message;
 
-       
-
         return res.status(502).json({
           success: false,
           error: lastError
         });
+      } finally {
+        clearTimeout(timer);
+      }
       } finally {
         clearTimeout(timer);
       }
