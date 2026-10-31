@@ -501,7 +501,7 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
 <script>
 (function () {
   const $ = id => document.getElementById(id);
-  const storageKey = "solocoai_leads_v1";
+  const storageKey = "gosolo ai_leads_v1";
   let leads = [];
 
   try {
@@ -637,7 +637,7 @@ $("acq-export").addEventListener("click", function () {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "soloco-ai-prospects.csv";
+  link.download = "GOSOLO-AI-prospects.csv";
   document.body.appendChild(link);
   link.click();
   link.remove();
