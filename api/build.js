@@ -145,7 +145,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 
         raw = await response.text();
       } catch (error) {
-        console.error("Soloco Gemini request failed:", {
+        console.error("Gosolo Gemini request failed:", {
           name: error.name,
           message: error.message
         });
