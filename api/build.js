@@ -1,4 +1,6 @@
 
+import { getActiveSubscription } from "../lib/billing.js";
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -8,6 +10,13 @@ export default async function handler(req, res) {
       success: false,
       error: "Use a POST request."
     });
+  }
+
+  try {
+    const access = await getActiveSubscription(req);
+    if (!access) return res.status(402).json({ success: false, error: "A GoSolo subscription is required to build and operate a business. Subscribe to unlock this feature." });
+  } catch (error) {
+    return res.status(503).json({ success: false, error: error.message || "Subscription verification is unavailable." });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
