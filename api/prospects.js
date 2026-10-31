@@ -1,3 +1,5 @@
+import { getActiveSubscription } from "../lib/billing.js";
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -7,6 +9,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    const access = await getActiveSubscription(req);
+    if (!access) return res.status(402).json({ error: "A GoSolo subscription is required to research prospects." });
     const body = req.body || {};
     const service = String(body.service || "").trim().slice(0, 300);
     const area = String(body.area || "").trim().slice(0, 200);
