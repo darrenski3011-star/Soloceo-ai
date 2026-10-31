@@ -667,12 +667,23 @@ $("acq-export").addEventListener("click", function () {
     }
 
     const lead = leads[Number(index)];
+    if (!lead) {
+      alert("That prospect could not be found. Refresh the prospect list and try again.");
+      return;
+    }
+
+    const service = $("acq-service").value.trim() || "my services";
+    const area = $("acq-area").value.trim() || "your area";
+    const need = String(lead.need || "").trim();
+    const opening = need
+      ? "I'm getting in touch because you may be looking for help with " + need + "."
+      : "I'm reaching out to introduce my " + service + " services.";
+
     $("acq-message").value =
-      "Hi " + lead.name + ",\n\n" +
-      "I'm reaching out about " + (lead.need || "a possible need for " + $("acq-service").value.trim()) +
-      ". I work in " + ($("acq-area").value.trim() || "your area") +
-      " and wanted to see if this is something you'd like help with.\n\n" +
-      "If you're interested, let me know and I can share more details.\n\nThank you!";
+      "Hi " + (String(lead.name || "").trim() || "there") + ",\n\n" +
+      opening + " I work in " + area + " and wanted to ask whether you still need assistance.\n\n" +
+      "If this is something you're interested in, I can provide more information and discuss the next steps.\n\n" +
+      "Thank you!";
     lead.status = "Draft ready";
     save();
     $("acq-select").value = index;
