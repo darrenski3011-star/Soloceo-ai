@@ -524,12 +524,23 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
     render();
   }
 
+  function leadScore(lead) {
+    let score = 0;
+    if (String(lead.name || "").trim()) score += 15;
+    if (String(lead.contact || "").trim()) score += 30;
+    if (String(lead.need || "").trim()) score += 30;
+    if (String(lead.source || "").trim()) score += 15;
+    if (String(lead.notes || "").trim()) score += 10;
+    return score;
+  }
+
   function render() {
     const select = $("acq-select");
     const previous = select.value;
     select.innerHTML = '<option value="">Select a saved prospect</option>' +
       leads.map((lead, i) =>
-        '<option value="' + i + '">' + escapeHTML(lead.name) + '</option>'
+        '<option value="' + i + '">' + escapeHTML(lead.name) +
+        ' · ' + leadScore(lead) + '/100</option>'
       ).join("");
     if (previous !== "" && leads[Number(previous)]) select.value = previous;
 
@@ -558,6 +569,9 @@ if (summary) {
     pipeline.innerHTML = leads.map((lead, i) =>
       '<div class="acq-card">' +
         '<strong>' + escapeHTML(lead.name) + '</strong>' +
+        '<p><strong>Lead quality: ' + leadScore(lead) + '/100</strong> · ' +
+          (leadScore(lead) >= 70 ? 'Strong record' : leadScore(lead) >= 40 ? 'Needs details' : 'Incomplete') +
+        '</p>' +
         '<p>' + escapeHTML(lead.need) + '</p>' +
         '<p class="acq-muted">' + escapeHTML(lead.contact) +
           (lead.source ? ' · Source: ' + escapeHTML(lead.source) : '') + '</p>' +
@@ -605,9 +619,19 @@ if (summary) {
       return;
     }
 
+    const contact = $("acq-contact").value.trim();
+    const duplicate = leads.some(lead =>
+      String(lead.name || "").trim().toLowerCase() === name.toLowerCase() &&
+      String(lead.contact || "").trim().toLowerCase() === contact.toLowerCase()
+    );
+    if (duplicate) {
+      alert("This prospect is already saved with the same name and contact details.");
+      return;
+    }
+
     leads.unshift({
       name,
-      contact: $("acq-contact").value.trim(),
+      contact,
       need: $("acq-need").value.trim(),
       source: $("acq-source").value.trim(),
       notes: $("acq-notes").value.trim(),
@@ -618,7 +642,7 @@ if (summary) {
     ["acq-name","acq-contact","acq-need","acq-source","acq-notes"].forEach(id => $(id).value = "");
   });
 $("acq-export").addEventListener("click", function () {
-  const columns = ["name", "contact", "need", "source", "notes", "status"];
+  const columns = ["name", "contact", "need", "source", "notes", "status", "leadScore"];
 
   const csvCell = value =>
     '"' + String(value || "").replace(/"/g, '""') + '"';
@@ -626,7 +650,7 @@ $("acq-export").addEventListener("click", function () {
   const csv = [
     columns.join(","),
     ...leads.map(lead =>
-      columns.map(key => csvCell(lead[key])).join(",")
+      columns.map(key => csvCell(key === "leadScore" ? leadScore(lead) : lead[key])).join(",")
     )
   ].join("\r\n");
 
