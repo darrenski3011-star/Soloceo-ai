@@ -1,0 +1,70 @@
+export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store");
+
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Use a POST request." });
+  }
+
+  try {
+    const body = req.body || {};
+    const service = String(body.service || "").trim().slice(0, 300);
+    const area = String(body.area || "").trim().slice(0, 200);
+
+    if (!service || !area) {
+      return res.status(400).json({ error: "Enter a service and service area." });
+    }
+
+    const apiKey = process.env.FIRECRAWL_API_KEY;
+    const response = await fetch("https://api.firecrawl.dev/v2/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(apiKey ? { Authorization: "Bearer " + apiKey } : {})
+      },
+      body: JSON.stringify({
+        query: '"' + service + '" potential customers OR looking for "' + area + '"',
+        limit: 8,
+        sources: ["web"]
+      }),
+      signal: AbortSignal.timeout(25000)
+    });
+
+    const raw = await response.text();
+    let data = {};
+    try { data = JSON.parse(raw); } catch {}
+
+    if (!response.ok) {
+      console.error("Firecrawl search failed:", response.status, raw.slice(0, 400));
+      return res.status(502).json({
+        error: response.status === 401 || response.status === 403
+          ? "Firecrawl rejected the API key. Check FIRECRAWL_API_KEY in Vercel."
+          : "Public prospect research is temporarily unavailable. Please try again."
+      });
+    }
+
+    const web = data?.data?.web || data?.web || [];
+    const seen = new Set();
+    const results = web
+      .filter(item => item && typeof item.url === "string" && /^https?:\/\//i.test(item.url))
+      .filter(item => {
+        const key = item.url.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .slice(0, 8)
+      .map(item => ({
+        title: String(item.title || "Public web result").slice(0, 300),
+        url: item.url,
+        description: String(item.description || item.snippet || "").slice(0, 1200)
+      }));
+
+    return res.status(200).json({ success: true, results });
+  } catch (error) {
+    console.error("GoSolo prospect research error:", error);
+    return res.status(502).json({
+      error: "Prospect research timed out or could not connect. Try again."
+    });
+  }
+}
