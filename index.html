@@ -811,6 +811,7 @@ $("acq-export").addEventListener("click", function () {
 <script>
 (() => {
   const status = document.getElementById("billing-status");
+  document.getElementById("dashboard").after(document.getElementById("subscription-panel"));
   const subscribe = document.getElementById("subscribe-button");
   const manage = document.getElementById("manage-subscription-button");
   let active = false;
