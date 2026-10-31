@@ -455,8 +455,11 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
     </label>
   </div>
   <button type="button" id="acq-search">Create search links</button>
+  <button type="button" id="acq-research">Research prospects with AI</button>
+  <p id="acq-research-status" class="acq-muted" aria-live="polite">Search public web results for potential customers. Review every result before saving or contacting anyone.</p>
+  <div id="acq-research-results"></div>
   <div id="acq-links"></div>
-  <p class="acq-muted">These links open public search results. Verify each prospect before reaching out.</p>
+  <p class="acq-muted">Search results are leads to review, not confirmed buyers. GoSolo will never contact anyone automatically.</p>
 
   <h3>2. Add a prospect</h3>
   <div class="acq-grid">
@@ -583,6 +586,77 @@ if (summary) {
       '</div>'
     ).join("");
   }
+
+  $("acq-research").addEventListener("click", async function () {
+    const service = $("acq-service").value.trim();
+    const area = $("acq-area").value.trim();
+    const status = $("acq-research-status");
+    const resultsBox = $("acq-research-results");
+    if (!service || !area) {
+      status.textContent = "Enter a service or product and a service area first.";
+      return;
+    }
+
+    const button = $("acq-research");
+    button.disabled = true;
+    status.textContent = "Searching public web sources for potential customers...";
+    resultsBox.innerHTML = "";
+
+    try {
+      const response = await fetch("/api/prospects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service, area })
+      });
+      const data = await response.json();
+      if (!response.ok || !Array.isArray(data.results)) {
+        throw new Error(data.error || "Prospect research failed.");
+      }
+      if (!data.results.length) {
+        status.textContent = "No useful public results were found. Try a broader service description or nearby area.";
+        return;
+      }
+
+      status.textContent = data.results.length + " public search results found. Review them and save only genuine prospects.";
+      resultsBox.innerHTML = data.results.map((item, i) =>
+        '<div class="acq-card">' +
+          '<strong>' + escapeHTML(item.title || "Untitled result") + '</strong>' +
+          '<p>' + escapeHTML(item.description || "No description provided by the source.") + '</p>' +
+          '<p><a class="acq-link" href="' + escapeHTML(item.url) + '" target="_blank" rel="noopener noreferrer">Open source</a></p>' +
+          '<button type="button" data-save-research="' + i + '">Save as prospect</button>' +
+        '</div>'
+      ).join("");
+
+      resultsBox.querySelectorAll("[data-save-research]").forEach(button => {
+        button.addEventListener("click", () => {
+          const item = data.results[Number(button.dataset.saveResearch)];
+          if (!item) return;
+          const alreadySaved = leads.some(lead => lead.sourceUrl === item.url);
+          if (alreadySaved) {
+            status.textContent = "That source is already in your prospect list.";
+            return;
+          }
+          leads.unshift({
+            name: item.title || "Unverified prospect",
+            contact: item.url || "",
+            need: service,
+            source: "Firecrawl public web search",
+            sourceUrl: item.url || "",
+            notes: item.description || "Review source and verify buying intent.",
+            status: "New"
+          });
+          save();
+          button.disabled = true;
+          button.textContent = "Saved";
+          status.textContent = "Saved for review. No message was sent.";
+        });
+      });
+    } catch (error) {
+      status.textContent = error.message || "Could not research prospects right now.";
+    } finally {
+      button.disabled = false;
+    }
+  });
 
   $("acq-search").addEventListener("click", function () {
     const service = $("acq-service").value.trim();
