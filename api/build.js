@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     }
 
     const prompt = `
-You are Soloco AI, an AI business operator.
+You are Gosolo AI, an AI business operator.
 
 Build a practical business launch blueprint.
 
