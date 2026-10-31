@@ -807,5 +807,67 @@ $("acq-export").addEventListener("click", function () {
 })();
 </script>
 
+<script>
+(() => {
+  const status = document.getElementById("billing-status");
+  const subscribe = document.getElementById("subscribe-button");
+  const manage = document.getElementById("manage-subscription-button");
+  let active = false;
+  async function refresh() {
+    try {
+      const r = await fetch("/api/billing?action=status");
+      const d = await r.json();
+      active = !!(r.ok && d.active);
+      status.textContent = active ? "Subscription active. Operator tools unlocked." : "Free preview available. Subscribe to unlock full business building.";
+      subscribe.classList.toggle("hidden", active);
+      manage.classList.toggle("hidden", !active);
+    } catch { status.textContent = "Unable to check subscription. Refresh and try again."; }
+  }
+  subscribe.addEventListener("click", async () => {
+    subscribe.disabled = true;
+    status.textContent = "Opening secure Stripe checkout...";
+    try {
+      const r = await fetch("/api/billing?action=checkout", {method:"POST"});
+      const d = await r.json();
+      if (!r.ok || !d.url) throw new Error(d.error || "Checkout unavailable.");
+      location.href = d.url;
+    } catch (e) { status.textContent = e.message; subscribe.disabled = false; }
+  });
+  manage.addEventListener("click", async () => {
+    const r = await fetch("/api/billing?action=portal", {method:"POST"});
+    const d = await r.json();
+    if (r.ok && d.url) location.href = d.url;
+    else status.textContent = d.error || "Billing portal unavailable.";
+  });
+  document.getElementById("businessForm").addEventListener("submit", e => {
+    if (!active) { e.preventDefault(); e.stopImmediatePropagation(); status.textContent = "Subscribe for $29/month to unlock the full business build."; document.getElementById("subscription-panel").scrollIntoView({behavior:"smooth"}); }
+  }, true);
+  const preview = document.createElement("button");
+  preview.type = "button"; preview.className = "button secondary"; preview.textContent = "Preview what GoSolo can build";
+  const form = document.getElementById("businessForm");
+  form.insertBefore(preview, document.getElementById("generateButton"));
+  preview.addEventListener("click", () => {
+    const idea = document.getElementById("business").value.trim();
+    const box = document.getElementById("free-preview");
+    if (!idea) { status.textContent = "Enter a business idea first."; return; }
+    box.textContent = "Your idea: " + idea + "\n\nThe full GoSolo operator can develop your offer, pricing, launch assets, prospect research, and approval-based operating workflow.";
+    box.classList.remove("hidden");
+  });
+  (async () => {
+    const p = new URLSearchParams(location.search);
+    if (p.get("checkout") === "success" && p.get("session_id")) {
+      status.textContent = "Confirming your payment...";
+      try {
+        const r = await fetch("/api/billing?action=confirm&session_id=" + encodeURIComponent(p.get("session_id")));
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || "Payment confirmation pending.");
+        history.replaceState({}, "", "/");
+      } catch (e) { status.textContent = e.message; }
+    }
+    if (p.get("checkout") === "cancelled") { history.replaceState({}, "", "/"); status.textContent = "Checkout cancelled. No subscription was started."; }
+    await refresh();
+  })();
+})();
+</script>
 </body>
 </html>
