@@ -23,8 +23,8 @@ export default async function handler(req, res) {
         ...(apiKey ? { Authorization: "Bearer " + apiKey } : {})
       },
       body: JSON.stringify({
-        query: '"' + service + '" potential customers OR looking for "' + area + '"',
-        limit: 8,
+        query: '("looking for ' + service + '" OR "need ' + service + '" OR "' + service + ' recommendation") "' + area + '"',
+        limit: 10,
         sources: ["web"]
       }),
       signal: AbortSignal.timeout(25000)
