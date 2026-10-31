@@ -278,7 +278,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
       error: lastError
     });
   } catch (error) {
-    console.error("Soloco AI backend error:", error);
+    console.error("GoSolo AI backend error:", error);
 
     return res.status(500).json({
       success: false,
