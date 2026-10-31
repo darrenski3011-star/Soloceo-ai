@@ -47,7 +47,7 @@
       <p class="subtitle">Your AI business operator. Build smarter. Operate with approval.</p>
     </header>
 
-    <section class="panel" id="subscription-panel"><h2>Free preview</h2><p class="muted">Preview your idea before subscribing. Full business building and prospect research unlock with a $29/month subscription.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Subscribe for $29/month</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button><div id="free-preview" class="item hidden"></div></section>
+    <section class="panel" id="subscription-panel"><h2>Free preview</h2><p class="muted">Explore your personalized business preview first. Subscribe for $29/month to unlock the full launch assets and operator tools.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Subscribe for $29/month</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button><div id="free-preview" class="item hidden"></div></section>
     <section class="panel">
       <h2>Start your business</h2>
       <p class="muted">Describe what you want to build. GOSOLO AI will generate an operator dashboard and a practical first version.</p>
@@ -840,20 +840,8 @@ $("acq-export").addEventListener("click", function () {
     if (r.ok && d.url) location.href = d.url;
     else status.textContent = d.error || "Billing portal unavailable.";
   });
-  document.getElementById("businessForm").addEventListener("submit", e => {
-    if (!active) { e.preventDefault(); e.stopImmediatePropagation(); status.textContent = "Subscribe for $29/month to unlock the full business build."; document.getElementById("subscription-panel").scrollIntoView({behavior:"smooth"}); }
-  }, true);
-  const preview = document.createElement("button");
-  preview.type = "button"; preview.className = "button secondary"; preview.textContent = "Preview what GoSolo can build";
-  const form = document.getElementById("businessForm");
-  form.insertBefore(preview, document.getElementById("generateButton"));
-  preview.addEventListener("click", () => {
-    const idea = document.getElementById("business").value.trim();
-    const box = document.getElementById("free-preview");
-    if (!idea) { status.textContent = "Enter a business idea first."; return; }
-    box.textContent = "Your idea: " + idea + "\n\nThe full GoSolo operator can develop your offer, pricing, launch assets, prospect research, and approval-based operating workflow.";
-    box.classList.remove("hidden");
-  });
+
+
   (async () => {
     const p = new URLSearchParams(location.search);
     if (p.get("checkout") === "success" && p.get("session_id")) {
