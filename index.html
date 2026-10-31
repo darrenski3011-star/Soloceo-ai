@@ -402,7 +402,7 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
         statusBox.textContent = "Business operator dashboard generated.";
         statusBox.className = "status";
       } catch (error) {
-        console.error("Soloco AI build request failed:", error);
+        console.error("Gosolo AI build request failed:", error);
         statusBox.textContent = "BUILD FAILED\n" + (error instanceof Error ? error.message : String(error));
         statusBox.className = "status error";
       } finally {
