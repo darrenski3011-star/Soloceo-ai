@@ -16,7 +16,7 @@ if (!panel || !status || !authForm || !signedIn) {
   let syncing = false;
 
   async function authRequest(path, body) {
-    const response = await fetch(url.replace(/\\/$/, "") + "/auth/v1/" + path, {
+    const response = await fetch(url.replace(/\/$/, "")) + "/auth/v1/" + path, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: anonKey },
       body: JSON.stringify(body)
@@ -99,7 +99,7 @@ if (!panel || !status || !authForm || !signedIn) {
     try {
       const local = JSON.parse(localStorage.getItem(storageKey) || "[]");
       const headers = { apikey: anonKey, Authorization: "Bearer " + accessToken, "Content-Type": "application/json" };
-      const read = await fetch(url.replace(/\\/$/, "") + "/rest/v1/user_data?select=data&data_key=eq.prospects", { headers });
+      const read = await fetch(url.replace(/\/$/, "")) + "/rest/v1/user_data?select=data&data_key=eq.prospects", { headers });
       const rows = await read.json();
       if (!read.ok) throw new Error(rows.message || "Could not read saved prospects.");
       const cloud = Array.isArray(rows?.[0]?.data) ? rows[0].data : [];
@@ -110,7 +110,7 @@ if (!panel || !status || !authForm || !signedIn) {
         seen.add(key);
         return true;
       });
-      const write = await fetch(url.replace(/\\/$/, "") + "/rest/v1/user_data?on_conflict=user_id,data_key", {
+      const write = await fetch(url.replace(/\/$/, "")) + "/rest/v1/user_data?on_conflict=user_id,data_key", {
         method: "POST",
         headers: { ...headers, Prefer: "resolution=merge-duplicates,return=minimal" },
         body: JSON.stringify({ data_key: "prospects", data: merged })
