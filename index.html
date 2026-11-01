@@ -443,7 +443,7 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
   .acq-muted{color:#a9c5ad;font-size:13px}
 </style>
 
-<section class="acq-panel" id="customer-acquisition">
+<section class="acq-panel hidden" id="customer-acquisition">
   <h2>Customer Acquisition Engine</h2>
   <p>Find potential customers, prepare outreach, and track prospects. Gosolo AI will not contact anyone without your approval.</p>
 
@@ -822,6 +822,7 @@ $("acq-export").addEventListener("click", function () {
       const d = await r.json();
       active = !!(r.ok && d.active);
       status.textContent = active ? "Subscription active. Operator tools unlocked." : "Free preview available. Subscribe to unlock full business building.";
+      document.getElementById("customer-acquisition")?.classList.toggle("hidden", !active);
       subscribe.classList.toggle("hidden", active);
       manage.classList.toggle("hidden", !active);
     } catch { status.textContent = "Unable to check subscription. Refresh and try again."; }
