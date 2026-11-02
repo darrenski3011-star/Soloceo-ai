@@ -9,20 +9,39 @@ const signedIn = $("gosolo-signed-in");
 if (!panel || !status || !authForm || !signedIn) {
   console.error("GoSolo account panel markup is missing.");
 } else if (!url || !anonKey) {
-  status.textContent = "Account service is not configured. Check the Supabase URL and publishable key in Vercel.";
+  status.textContent = "Account service is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel.";
 } else {
+  const base = url.replace(/\/$/, "");
   const storageKey = "gosolo ai_leads_v1";
-  let accessToken = null;
+  const sessionKey = "gosolo_supabase_session_v1";
+  let session = null;
   let syncing = false;
+  let refreshPromise = null;
 
-  async function authRequest(path, body) {
-    const response = await fetch(url.replace(/\/$/, "") + "/auth/v1/" + path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: anonKey },
-      body: JSON.stringify(body)
+  function saveSession(value) {
+    session = value;
+    try {
+      if (value) localStorage.setItem(sessionKey, JSON.stringify(value));
+      else localStorage.removeItem(sessionKey);
+    } catch (_) {
+      status.textContent = "This browser blocked session storage. Enable site storage and log in again.";
+    }
+  }
+
+  async function request(path, options = {}, token) {
+    const response = await fetch(base + path, {
+      ...options,
+      headers: {
+        apikey: anonKey,
+        ...(token ? { Authorization: "Bearer " + token } : {}),
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.headers || {})
+      }
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.msg || result.message || result.error_description || result.error || "Supabase request failed (" + response.status + ").");
+    if (!response.ok) {
+      throw new Error(result.msg || result.message || result.error_description || result.error || "Supabase request failed (" + response.status + ").");
+    }
     return result;
   }
 
@@ -32,7 +51,7 @@ if (!panel || !status || !authForm || !signedIn) {
     signedIn.hidden = !active;
     $("gosolo-user").textContent = active ? "Signed in as " + user.email : "";
     status.textContent = active
-      ? "Signed in. Your prospects stay on this device until you choose Sync my prospects."
+      ? "Signed in. Your prospects sync to your account when you save them."
       : "Create an account or log in to save your GoSolo workspace.";
   }
 
@@ -47,6 +66,42 @@ if (!panel || !status || !authForm || !signedIn) {
     }
   }
 
+  async function refreshSession() {
+    if (!session?.refresh_token) return null;
+    if (refreshPromise) return refreshPromise;
+    refreshPromise = (async () => {
+      try {
+        const next = await request("/auth/v1/token?grant_type=refresh_token", {
+          method: "POST",
+          body: JSON.stringify({ refresh_token: session.refresh_token })
+        });
+        saveSession(next);
+        return next;
+      } catch (error) {
+        saveSession(null);
+        showUser(null);
+        throw error;
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+    return refreshPromise;
+  }
+
+  async function validAccessToken() {
+    if (!session?.access_token) throw new Error("Log in first.");
+    const expiresAt = Number(session.expires_at || 0);
+    if (expiresAt && expiresAt * 1000 < Date.now() + 60000) {
+      await refreshSession();
+    }
+    if (!session?.access_token) throw new Error("Your session expired. Log in again.");
+    return session.access_token;
+  }
+
+  async function authRequest(path, body) {
+    return request("/auth/v1/" + path, { method: "POST", body: JSON.stringify(body) });
+  }
+
   $("gosolo-signup").addEventListener("click", async () => {
     const email = $("gosolo-email").value.trim();
     const password = $("gosolo-password").value;
@@ -56,14 +111,15 @@ if (!panel || !status || !authForm || !signedIn) {
       return;
     }
     setBusy(button, true, "Creating account...");
-    status.textContent = "Connecting securely to Supabase...";
+    status.textContent = "Creating your secure account...";
     try {
       const data = await authRequest("signup", { email, password });
-      if (data.access_token) {
-        accessToken = data.access_token;
+      if (data.access_token && data.user) {
+        saveSession(data);
         showUser(data.user);
+        await syncProspects();
       } else {
-        status.textContent = "Account request received. Check your email for a confirmation link, then log in.";
+        status.textContent = "Account created. Check your email for the confirmation link, then return here and log in.";
       }
     } catch (error) {
       status.textContent = error.message || "Account creation failed.";
@@ -83,8 +139,9 @@ if (!panel || !status || !authForm || !signedIn) {
     setBusy(button, true, "Logging in...");
     try {
       const data = await authRequest("token?grant_type=password", { email, password });
-      accessToken = data.access_token;
+      saveSession(data);
       showUser(data.user);
+      await syncProspects();
     } catch (error) {
       status.textContent = error.message || "Login failed.";
     } finally {
@@ -94,47 +151,95 @@ if (!panel || !status || !authForm || !signedIn) {
 
   async function syncProspects() {
     if (syncing) return;
-    if (!accessToken) throw new Error("Log in first.");
+    const token = await validAccessToken();
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("Your account session is incomplete. Log out and log in again.");
     syncing = true;
     try {
-      const local = JSON.parse(localStorage.getItem(storageKey) || "[]");
-      const headers = { apikey: anonKey, Authorization: "Bearer " + accessToken, "Content-Type": "application/json" };
-      const read = await fetch(url.replace(/\/$/, "") + "/rest/v1/user_data?select=data&data_key=eq.prospects", { headers });
-      const rows = await read.json();
-      if (!read.ok) throw new Error(rows.message || "Could not read saved prospects.");
-      const cloud = Array.isArray(rows?.[0]?.data) ? rows[0].data : [];
+      const headers = { Prefer: "resolution=merge-duplicates,return=minimal" };
+      const read = await request("/rest/v1/user_data?select=data&data_key=eq.prospects&user_id=eq." + encodeURIComponent(userId), {}, token);
+      const cloud = Array.isArray(read?.[0]?.data) ? read[0].data : [];
+      let local = [];
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        local = Array.isArray(parsed) ? parsed : [];
+      } catch (_) {}
       const seen = new Set();
-      const merged = [...cloud, ...(Array.isArray(local) ? local : [])].filter(item => {
+      const merged = [...cloud, ...local].filter(item => {
         const key = [item.sourceUrl || "", String(item.name || "").toLowerCase(), String(item.contact || "").toLowerCase()].join("|");
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
       });
-      const write = await fetch(url.replace(/\/$/, "") + "/rest/v1/user_data?on_conflict=user_id,data_key", {
+      await request("/rest/v1/user_data?on_conflict=user_id,data_key", {
         method: "POST",
-        headers: { ...headers, Prefer: "resolution=merge-duplicates,return=minimal" },
-        body: JSON.stringify({ data_key: "prospects", data: merged })
-      });
-      if (!write.ok) {
-        const error = await write.json().catch(() => ({}));
-        throw new Error(error.message || "Cloud sync failed (" + write.status + ").");
-      }
+        headers,
+        body: JSON.stringify({ user_id: userId, data_key: "prospects", data: merged })
+      }, token);
       localStorage.setItem(storageKey, JSON.stringify(merged));
       status.textContent = "Cloud sync complete. " + merged.length + " prospect(s) saved to your account.";
+      window.dispatchEvent(new CustomEvent("gosolo:cloud-synced", { detail: { count: merged.length } }));
     } finally {
       syncing = false;
     }
   }
 
   $("gosolo-sync").addEventListener("click", async () => {
+    const button = $("gosolo-sync");
+    setBusy(button, true, "Syncing...");
     try { await syncProspects(); }
     catch (error) { status.textContent = error.message || "Cloud sync failed."; }
+    finally { setBusy(button, false); }
   });
 
-  $("gosolo-logout").addEventListener("click", () => {
-    accessToken = null;
-    showUser(null);
+  $("gosolo-logout").addEventListener("click", async () => {
+    const button = $("gosolo-logout");
+    setBusy(button, true, "Logging out...");
+    try {
+      if (session?.access_token) {
+        await request("/auth/v1/logout", { method: "POST" }, session.access_token);
+      }
+    } catch (error) {
+      console.warn("Remote sign-out did not complete:", error);
+    } finally {
+      saveSession(null);
+      showUser(null);
+      setBusy(button, false);
+    }
   });
 
-  status.textContent = "Account service ready. Enter your email and password to create an account.";
+  window.addEventListener("gosolo:prospects-updated", () => {
+    if (session?.access_token && !syncing) {
+      syncProspects().catch(error => {
+        status.textContent = "Prospects saved on this device. Cloud sync needs attention: " + (error.message || "unknown error");
+      });
+    }
+  });
+
+  async function restoreSession() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(sessionKey) || "null");
+      if (!saved?.refresh_token) {
+        showUser(null);
+        status.textContent = "Account service ready. Enter your email and password to create an account.";
+        return;
+      }
+      session = saved;
+      if (Number(session.expires_at || 0) * 1000 < Date.now() + 60000) {
+        await refreshSession();
+      }
+      if (session?.access_token && session?.user) {
+        showUser(session.user);
+        await syncProspects();
+      } else {
+        showUser(null);
+      }
+    } catch (error) {
+      status.textContent = "Could not restore your account session. Log in again. " + (error.message || "");
+      saveSession(null);
+      showUser(null);
+    }
+  }
+
+  restoreSession();
 }
