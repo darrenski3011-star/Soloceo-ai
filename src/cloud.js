@@ -208,6 +208,12 @@ if (!panel || !status || !authForm || !signedIn) {
     }
   });
 
+  const originalSetItem = Storage.prototype.setItem;
+  Storage.prototype.setItem = function(key, value) {
+    originalSetItem.call(this, key, value);
+    if (key === storageKey) window.dispatchEvent(new CustomEvent("gosolo:prospects-updated"));
+  };
+
   window.addEventListener("gosolo:prospects-updated", () => {
     if (session?.access_token && !syncing) {
       syncProspects().catch(error => {
