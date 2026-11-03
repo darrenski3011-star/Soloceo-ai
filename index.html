@@ -389,7 +389,7 @@
       });
     }
 
-    function renderOperator(operator) {
+    function renderOperator(operator, persist = true) {
       latestOperator = operator;
       completedTasks.clear();
       setText("businessName", operator.businessName || operator.name || "Business operator dashboard");
@@ -418,6 +418,11 @@ if (acquisitionService && !acquisitionService.value.trim()) {
 if (acquisitionArea && !acquisitionArea.value.trim()) {
   acquisitionArea.value = "Hawley, Minnesota";
 }
+      if (persist) {
+        try { localStorage.setItem("gosolo_ai_operator_v1", JSON.stringify(operator)); }
+        catch (error) { console.warn("Could not save the business workspace on this device:", error); }
+        window.dispatchEvent(new CustomEvent("gosolo:operator-updated", { detail: { operator } }));
+      }
       dashboard.classList.remove("hidden");
       dashboard.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -503,6 +508,19 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
     document.getElementById("copyPlanButton").addEventListener("click", () => {
       if (latestOperator) copyText(JSON.stringify(latestOperator, null, 2));
     });
+
+    window.addEventListener("gosolo:operator-restored", event => {
+      if (event.detail && event.detail.operator) renderOperator(event.detail.operator, false);
+    });
+
+    try {
+      const savedOperator = JSON.parse(localStorage.getItem("gosolo_ai_operator_v1") || "null");
+      if (savedOperator && typeof savedOperator === "object" && !Array.isArray(savedOperator)) {
+        renderOperator(savedOperator, false);
+      }
+    } catch (error) {
+      console.warn("Saved GoSolo workspace could not be restored:", error);
+    }
   })();
   </script>
 
