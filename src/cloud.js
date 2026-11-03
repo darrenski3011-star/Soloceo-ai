@@ -177,7 +177,9 @@ if (!panel || !status || !authForm || !signedIn) {
         body: JSON.stringify({ user_id: userId, data_key: "prospects", data: merged })
       }, token);
       localStorage.setItem(storageKey, JSON.stringify(merged));
-      status.textContent = "Cloud sync complete. " + merged.length + " prospect(s) saved to your account.";
+      status.textContent = merged.length
+        ? "Cloud sync complete. " + merged.length + " prospect(s) synced to your account."
+        : "Account sync complete. No prospects are saved yet. Use Research prospects to find leads, then save the ones worth reviewing.";
       window.dispatchEvent(new CustomEvent("gosolo:cloud-synced", { detail: { count: merged.length, prospects: merged } }));
     } finally {
       syncing = false;
