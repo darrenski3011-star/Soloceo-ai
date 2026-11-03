@@ -96,6 +96,8 @@
         <div class="item"><h3>You stay in charge</h3><p>Review and approve before money is spent, content is published, customers are contacted or commitments are made.</p></div>
       </div>
       <p class="muted">Your subscription unlocks the full business-building workspace. GoSolo currently prepares plans, assets, prospect research and outreach drafts. It does not independently send messages, publish content, spend money or run scheduled jobs.</p>
+      <p><strong>Ready to get started?</strong></p>
+      <h2>Subscribe to GoSolo</h2>
     </section>
 
     <section id="gosolo-account" aria-labelledby="gosolo-account-title">
@@ -118,7 +120,7 @@
       </div>
     </section>
 
-    <section class="panel" id="subscription-panel"><h2>Unlock your AI business operator</h2><p class="muted">Get the full GoSolo business-building workspace for $29/month. Subscribe once, then build your business and manage its launch work from one dashboard.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Subscribe to GoSolo®</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button></section>
+    <section class="panel" id="subscription-panel"><h2>Unlock your AI business operator</h2><p class="muted">Get the full GoSolo business-building workspace for $29/month. Subscribe once, then build your business and manage its launch work from one dashboard.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Subscribe to GoSolo</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button></section>
     <section class="panel hidden" id="business-builder-panel">
       <h2>Start your business</h2>
       <p class="muted">Describe what you want to build. GOSOLO AI will generate an operator dashboard and a practical first version.</p>
@@ -892,7 +894,7 @@ $("acq-export").addEventListener("click", function () {
       const r = await fetch("/api/billing?action=status");
       const d = await r.json();
       active = !!(r.ok && d.active);
-      status.textContent = active ? "Subscription active. Operator tools unlocked." : "Free preview available. Subscribe to unlock full business building.";
+      status.textContent = active ? "Subscription active. Operator tools unlocked." : "No active subscription. Subscribe to unlock your business-building workspace.";
       document.getElementById("customer-acquisition")?.classList.toggle("hidden", !active);
       document.getElementById("business-builder-panel")?.classList.toggle("hidden", !active);
       document.getElementById("dashboard")?.classList.toggle("hidden", !active);
