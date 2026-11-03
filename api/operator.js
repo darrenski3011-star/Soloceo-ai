@@ -32,7 +32,7 @@ async function db(req, path, options = {}) {
   return data;
 }
 
-function emailOf(value) {
+function nextDailyRun() {\n  const next = new Date();\n  next.setUTCHours(15, 0, 0, 0);\n  if (next.getTime() <= Date.now()) next.setUTCDate(next.getUTCDate() + 1);\n  return next.toISOString();\n}\n\nfunction emailOf(value) {
   return String(value || "").trim().toLowerCase();
 }
 
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
         approval_queue: current?.approval_queue || business.approvalQueue || [],
         activity: current?.activity || [],
         status: "active",
-        next_run_at: new Date(Date.now() + 60 * 1000).toISOString(),
+        next_run_at: nextDailyRun(),
         last_error: null,
         updated_at: new Date().toISOString()
       };
@@ -85,7 +85,7 @@ export default async function handler(req, res) {
         headers: { Prefer: "resolution=merge-duplicates,return=representation" },
         body: JSON.stringify(record)
       });
-      return res.status(200).json({ success: true, workspace: saved?.[0] || record, message: "GoSolo operator started. Your first internal work cycle is queued." });
+      return res.status(200).json({ success: true, workspace: saved?.[0] || record, message: "GoSolo operator started. Your first internal work cycle is queued for the next daily run." });
     }
 
     if (!current) return res.status(404).json({ error: "No operator workspace exists yet. Build your business and start the operator." });
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
     if (action === "pause" || action === "resume") {
       const patch = action === "pause"
         ? { status: "paused", updated_at: new Date().toISOString() }
-        : { status: "active", next_run_at: new Date(Date.now() + 60 * 1000).toISOString(), last_error: null, updated_at: new Date().toISOString() };
+        : { status: "active", next_run_at: nextDailyRun(), last_error: null, updated_at: new Date().toISOString() };
       const saved = await db(req, query, {
         method: "PATCH",
         headers: { Prefer: "return=representation" },
