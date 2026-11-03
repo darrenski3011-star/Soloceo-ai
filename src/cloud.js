@@ -16,6 +16,7 @@ if (!panel || !status || !authForm || !signedIn) {
   const sessionKey = "gosolo_supabase_session_v1";
   let session = null;
   let syncing = false;
+  let syncRequested = false;
   let refreshPromise = null;
 
   function saveSession(value) {
@@ -150,39 +151,52 @@ if (!panel || !status || !authForm || !signedIn) {
   });
 
   async function syncProspects() {
-    if (syncing) return;
-    const token = await validAccessToken();
-    const userId = session?.user?.id;
-    if (!userId) throw new Error("Your account session is incomplete. Log out and log in again.");
+    if (syncing) {
+      syncRequested = true;
+      return;
+    }
     syncing = true;
     try {
-      const headers = { Prefer: "resolution=merge-duplicates,return=minimal" };
-      const read = await request("/rest/v1/user_data?select=data&data_key=eq.prospects&user_id=eq." + encodeURIComponent(userId), {}, token);
-      const cloud = Array.isArray(read?.[0]?.data) ? read[0].data : [];
-      let local = [];
-      try {
-        const parsed = JSON.parse(localStorage.getItem(storageKey) || "[]");
-        local = Array.isArray(parsed) ? parsed : [];
-      } catch (_) {}
-      const seen = new Set();
-      const merged = [...cloud, ...local].filter(item => {
-        const key = [item.sourceUrl || "", String(item.name || "").toLowerCase(), String(item.contact || "").toLowerCase()].join("|");
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-      await request("/rest/v1/user_data?on_conflict=user_id,data_key", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ user_id: userId, data_key: "prospects", data: merged })
-      }, token);
-      localStorage.setItem(storageKey, JSON.stringify(merged));
-      status.textContent = merged.length
-        ? "Cloud sync complete. " + merged.length + " prospect(s) synced to your account."
-        : "Account sync complete. No prospects are saved yet. Use Research prospects to find leads, then save the ones worth reviewing.";
-      window.dispatchEvent(new CustomEvent("gosolo:cloud-synced", { detail: { count: merged.length, prospects: merged } }));
+      do {
+        syncRequested = false;
+        const token = await validAccessToken();
+        const userId = session?.user?.id;
+        if (!userId) throw new Error("Your account session is incomplete. Log out and log in again.");
+
+        const headers = { Prefer: "resolution=merge-duplicates,return=minimal" };
+        const read = await request("/rest/v1/user_data?select=data&data_key=eq.prospects&user_id=eq." + encodeURIComponent(userId), {}, token);
+        const cloud = Array.isArray(read?.[0]?.data) ? read[0].data : [];
+        let local = [];
+        try {
+          const parsed = JSON.parse(localStorage.getItem(storageKey) || "[]");
+          local = Array.isArray(parsed) ? parsed : [];
+        } catch (_) {}
+        const seen = new Set();
+        const merged = [...cloud, ...local].filter(item => {
+          const key = [item.sourceUrl || "", String(item.name || "").toLowerCase(), String(item.contact || "").toLowerCase()].join("|");
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        await request("/rest/v1/user_data?on_conflict=user_id,data_key", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ user_id: userId, data_key: "prospects", data: merged })
+        }, token);
+        localStorage.setItem(storageKey, JSON.stringify(merged));
+        status.textContent = merged.length
+          ? "Cloud sync complete. " + merged.length + " prospect(s) synced to your account."
+          : "Account sync complete. No prospects are saved yet. Use Research prospects to find leads, then save the ones worth reviewing.";
+        window.dispatchEvent(new CustomEvent("gosolo:cloud-synced", { detail: { count: merged.length, prospects: merged } }));
+      } while (syncRequested);
     } finally {
       syncing = false;
+      if (syncRequested) {
+        syncRequested = false;
+        syncProspects().catch(error => {
+          status.textContent = "Prospect sync needs attention: " + (error.message || "unknown error");
+        });
+      }
     }
   }
 
