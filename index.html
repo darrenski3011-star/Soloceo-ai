@@ -364,27 +364,37 @@
         wrapper.className = "item";
         wrapper.style.marginTop = "10px";
         addText(wrapper, "h3", item.title || item.action || `Approval ${index + 1}`);
-        if (item.description || item.details) addText(wrapper, "p", item.description || item.details);
-        const currentStatus = item.status || "Pending";
+        if (item.description || item.details || item.reason) addText(wrapper, "p", item.description || item.details || item.reason);
+        if (item.proposed_action) addText(wrapper, "p", "Proposed: " + item.proposed_action);
+        const currentStatus = item.status || "pending";
         const statusTag = addText(wrapper, "span", currentStatus, "tag");
         const actions = document.createElement("div");
-        const approve = addText(actions, "button", "Approve", "button secondary");
+        const approve = addText(actions, "button", "Approve proposal", "button secondary");
         approve.type = "button";
         const reject = addText(actions, "button", "Reject", "button secondary");
         reject.type = "button";
-        const alreadyDecided = ["Approved locally", "Rejected locally"].includes(currentStatus);
+        const alreadyDecided = ["approved", "rejected", "approved locally", "rejected locally"].includes(String(currentStatus).toLowerCase());
         approve.disabled = alreadyDecided;
         reject.disabled = alreadyDecided;
-        function decide(decision) {
+        async function decide(decision) {
           item.status = decision;
-          item.decidedAt = new Date().toISOString();
+          item.decided_at = new Date().toISOString();
           statusTag.textContent = decision;
           approve.disabled = true;
           reject.disabled = true;
           persistOperator();
+          if (item.id) {
+            try {
+              const data = await operatorRequest("POST", { action: "decision", approvalId: item.id, decision });
+              if (data.workspace) showOperatorWorkspace(data.workspace);
+            } catch (error) {
+              statusTag.textContent = decision + " locally; cloud sync failed";
+              console.warn("GoSolo approval decision was not synced:", error);
+            }
+          }
         }
-        approve.addEventListener("click", () => decide("Approved locally"));
-        reject.addEventListener("click", () => decide("Rejected locally"));
+        approve.addEventListener("click", () => decide("approved"));
+        reject.addEventListener("click", () => decide("rejected"));
         wrapper.appendChild(actions);
         container.appendChild(wrapper);
       });
