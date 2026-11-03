@@ -178,7 +178,7 @@ if (!panel || !status || !authForm || !signedIn) {
       }, token);
       localStorage.setItem(storageKey, JSON.stringify(merged));
       status.textContent = "Cloud sync complete. " + merged.length + " prospect(s) saved to your account.";
-      window.dispatchEvent(new CustomEvent("gosolo:cloud-synced", { detail: { count: merged.length } }));
+      window.dispatchEvent(new CustomEvent("gosolo:cloud-synced", { detail: { count: merged.length, prospects: merged } }));
     } finally {
       syncing = false;
     }
