@@ -832,34 +832,52 @@ $("acq-export").addEventListener("click", function () {
     }
   });
 
-  $("acq-draft").addEventListener("click", function () {
+  $("acq-draft").addEventListener("click", async function () {
     const index = $("acq-select").value;
+    const button = $("acq-draft");
+    const status = $("acq-research-status");
     if (index === "") {
-      alert("Select a saved prospect first.");
+      status.textContent = "Select a saved prospect first.";
       return;
     }
 
     const lead = leads[Number(index)];
     if (!lead) {
-      alert("That prospect could not be found. Refresh the prospect list and try again.");
+      status.textContent = "That prospect could not be found. Refresh the prospect list and try again.";
       return;
     }
 
-    const service = $("acq-service").value.trim() || "my services";
-    const area = $("acq-area").value.trim() || "your area";
-    const need = String(lead.need || "").trim();
-    const opening = need
-      ? "I'm getting in touch because you may be looking for help with " + need + "."
-      : "I'm reaching out to introduce my " + service + " services.";
+    button.disabled = true;
+    button.textContent = "Preparing AI draft...";
+    status.textContent = "GoSolo is preparing a personalized draft. Nothing will be sent.";
+    try {
+      const response = await fetch("/api/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prospect: lead,
+          service: $("acq-service").value.trim() || "my services",
+          area: $("acq-area").value.trim(),
+          business: $("businessName")?.textContent || ""
+        })
+      });
+      const data = await response.json();
+      if (!response.ok || !data.draft) {
+        throw new Error(data.error || "Could not prepare the draft.");
+      }
 
-    $("acq-message").value =
-      "Hi " + (String(lead.name || "").trim() || "there") + ",\n\n" +
-      opening + " I work in " + area + " and wanted to ask whether you still need assistance.\n\n" +
-      "If this is something you're interested in, I can provide more information and discuss the next steps.\n\n" +
-      "Thank you!";
-    lead.status = "Draft ready";
-    save();
-    $("acq-select").value = index;
+      $("acq-message").value = data.draft;
+      lead.status = "Draft ready";
+      lead.lastDraftAt = new Date().toISOString();
+      save();
+      $("acq-select").value = index;
+      status.textContent = "AI draft ready. Review and edit it before sending. GoSolo has not contacted anyone.";
+    } catch (error) {
+      status.textContent = error.message || "AI drafting failed. Please try again.";
+    } finally {
+      button.disabled = false;
+      button.textContent = "Prepare draft";
+    }
   });
 
   $("acq-copy").addEventListener("click", async function () {
