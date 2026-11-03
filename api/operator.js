@@ -1,4 +1,6 @@
-export const config = { maxDuration: 60 };\n\nimport { getActiveSubscription } from "../lib/billing.js";
+export const config = { maxDuration: 60 };
+
+import { getActiveSubscription } from "../lib/billing.js";
 
 const base = () => (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
 const anon = () => process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
@@ -32,7 +34,23 @@ async function db(req, path, options = {}) {
   return data;
 }
 
-async function triggerWorker() {\n  const secret = process.env.CRON_SECRET || "";\n  const stripeKey = process.env.STRIPE_SECRET_KEY || "";\n  const geminiKey = process.env.GEMINI_API_KEY || "";\n  if (!secret || !stripeKey || !geminiKey || !base() || !anon()) return { started: false, reason: "Background worker secrets are not configured." };\n  const response = await fetch(base() + "/functions/v1/gosolo-operator", {\n    method: "POST",\n    headers: { "Content-Type": "application/json", apikey: anon(), Authorization: "Bearer " + anon(), "x-gosolo-cron-secret": secret, "x-gosolo-stripe-key": stripeKey, "x-gosolo-gemini-key": geminiKey },\n    body: "{}",\n    signal: AbortSignal.timeout(50000)\n  });\n  const data = await response.json().catch(() => ({}));\n  if (!response.ok) throw new Error(data.error || "Could not start the first operator cycle.");\n  return { started: true, processed: data.processed || 0, due: data.due || 0 };\n}\n\nfunction emailOf(value) {
+async function triggerWorker() {
+  const secret = process.env.CRON_SECRET || "";
+  const stripeKey = process.env.STRIPE_SECRET_KEY || "";
+  const geminiKey = process.env.GEMINI_API_KEY || "";
+  if (!secret || !stripeKey || !geminiKey || !base() || !anon()) return { started: false, reason: "Background worker secrets are not configured." };
+  const response = await fetch(base() + "/functions/v1/gosolo-operator", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: anon(), Authorization: "Bearer " + anon(), "x-gosolo-cron-secret": secret, "x-gosolo-stripe-key": stripeKey, "x-gosolo-gemini-key": geminiKey },
+    body: "{}",
+    signal: AbortSignal.timeout(50000)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || "Could not start the first operator cycle.");
+  return { started: true, processed: data.processed || 0, due: data.due || 0 };
+}
+
+function emailOf(value) {
   return String(value || "").trim().toLowerCase();
 }
 
@@ -85,7 +103,10 @@ export default async function handler(req, res) {
         headers: { Prefer: "resolution=merge-duplicates,return=representation" },
         body: JSON.stringify(record)
       });
-      let firstCycle = null;\n      try { firstCycle = await triggerWorker(); } catch (error) { console.error("GoSolo first operator cycle did not start:", error); }\n      const refreshed = await db(req, query);\n      return res.status(200).json({ success: true, workspace: refreshed?.[0] || saved?.[0] || record, firstCycle, message: firstCycle?.started ? "GoSolo operator started and the first internal cycle ran." : "GoSolo operator started. The first internal cycle is queued for the daily scheduler." });
+      let firstCycle = null;
+      try { firstCycle = await triggerWorker(); } catch (error) { console.error("GoSolo first operator cycle did not start:", error); }
+      const refreshed = await db(req, query);
+      return res.status(200).json({ success: true, workspace: refreshed?.[0] || saved?.[0] || record, firstCycle, message: firstCycle?.started ? "GoSolo operator started and the first internal cycle ran." : "GoSolo operator started. The first internal cycle is queued for the daily scheduler." });
     }
 
     if (!current) return res.status(404).json({ error: "No operator workspace exists yet. Build your business and start the operator." });
