@@ -25,5 +25,8 @@
         }
       ]
     }
+  ],
+  "crons": [
+    { "path": "/api/cron/operator", "schedule": "0 15 * * *" }
   ]
 }
