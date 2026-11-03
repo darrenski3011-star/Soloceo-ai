@@ -259,6 +259,13 @@
       }
     }
 
+    function persistOperator() {
+      if (!latestOperator) return;
+      try { localStorage.setItem("gosolo_ai_operator_v1", JSON.stringify(latestOperator)); }
+      catch (error) { console.warn("Could not save the business workspace on this device:", error); }
+      window.dispatchEvent(new CustomEvent("gosolo:operator-updated", { detail: { operator: latestOperator } }));
+    }
+
     function renderTasks(tasks) {
       const container = document.getElementById("tasks");
       container.replaceChildren();
@@ -278,10 +285,14 @@
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.id = "task-" + index;
+        checkbox.checked = item.completed === true;
+        if (checkbox.checked) completedTasks.add(taskId);
         checkbox.addEventListener("change", () => {
+          item.completed = checkbox.checked;
           if (checkbox.checked) completedTasks.add(taskId);
           else completedTasks.delete(taskId);
           updateTaskProgress(tasks.length);
+          persistOperator();
         });
         const label = document.createElement("label");
         label.htmlFor = checkbox.id;
@@ -342,16 +353,23 @@
         wrapper.style.marginTop = "10px";
         addText(wrapper, "h3", item.title || item.action || `Approval ${index + 1}`);
         if (item.description || item.details) addText(wrapper, "p", item.description || item.details);
-        const statusTag = addText(wrapper, "span", item.status || "Pending", "tag");
+        const currentStatus = item.status || "Pending";
+        const statusTag = addText(wrapper, "span", currentStatus, "tag");
         const actions = document.createElement("div");
         const approve = addText(actions, "button", "Approve", "button secondary");
         approve.type = "button";
         const reject = addText(actions, "button", "Reject", "button secondary");
         reject.type = "button";
+        const alreadyDecided = ["Approved locally", "Rejected locally"].includes(currentStatus);
+        approve.disabled = alreadyDecided;
+        reject.disabled = alreadyDecided;
         function decide(decision) {
+          item.status = decision;
+          item.decidedAt = new Date().toISOString();
           statusTag.textContent = decision;
           approve.disabled = true;
           reject.disabled = true;
+          persistOperator();
         }
         approve.addEventListener("click", () => decide("Approved locally"));
         reject.addEventListener("click", () => decide("Rejected locally"));
@@ -418,11 +436,7 @@ if (acquisitionService && !acquisitionService.value.trim()) {
 if (acquisitionArea && !acquisitionArea.value.trim()) {
   acquisitionArea.value = "Hawley, Minnesota";
 }
-      if (persist) {
-        try { localStorage.setItem("gosolo_ai_operator_v1", JSON.stringify(operator)); }
-        catch (error) { console.warn("Could not save the business workspace on this device:", error); }
-        window.dispatchEvent(new CustomEvent("gosolo:operator-updated", { detail: { operator } }));
-      }
+      if (persist) persistOperator();
       dashboard.classList.remove("hidden");
       dashboard.scrollIntoView({ behavior: "smooth", block: "start" });
     }
