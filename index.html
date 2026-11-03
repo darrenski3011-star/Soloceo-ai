@@ -86,15 +86,16 @@
     </header>
 
     <section class="panel" id="about-gosolo" aria-labelledby="about-gosolo-title">
-      <h2 id="about-gosolo-title">Build and grow your business with GoSolo AI</h2>
-      <p>GoSolo AI is an AI-assisted business builder and operator workspace. Turn a business idea into a practical launch plan, define your offer and pricing, prepare business assets, and organize the steps needed to find customers.</p>
+      <h2 id="about-gosolo-title">Your Business. Built and Operated by AI.</h2>
+      <p><strong>You bring the idea. GoSolo does the heavy lifting.</strong></p>
+      <p>Start your own online business with one click, then let GoSolo organize the work behind the scenes while you stay in control of important decisions.</p>
       <div class="cards">
-        <div class="item"><h3>Build your business</h3><p>Generate a business model, target customer, offer, pricing hypothesis and recurring-revenue plan.</p></div>
-        <div class="item"><h3>Prepare to launch</h3><p>Create priority actions and draft business assets that you can review and use.</p></div>
-        <div class="item"><h3>Find potential customers</h3><p>Research public web results, save prospects and prepare outreach drafts for review.</p></div>
-        <div class="item"><h3>You stay in control</h3><p>GoSolo AI does not send messages, publish content or spend money without your approval.</p></div>
+        <div class="item"><h3>What GoSolo builds for you</h3><p>Your business model, brand direction, offer, pricing strategy, target customers, launch assets, customer acquisition plan, prospect workspace and recurring-revenue strategy.</p></div>
+        <div class="item"><h3>What GoSolo handles</h3><p>Market and opportunity research, prospect discovery tools, prospect organization, personalized outreach drafts, promotional content, task planning and business performance tracking.</p></div>
+        <div class="item"><h3>Less busywork. More control.</h3><p>GoSolo organizes the research, planning and repeatable business work in one place, with clear next steps and a workspace you can return to.</p></div>
+        <div class="item"><h3>You stay in charge</h3><p>Review and approve before money is spent, content is published, customers are contacted or commitments are made.</p></div>
       </div>
-      <p class="muted">Start with a free preview. The full workspace is offered for $29 per month. Features currently prepare plans, assets and drafts; external actions and scheduled automation are not performed automatically.</p>
+      <p class="muted">Your subscription unlocks the full business-building workspace. GoSolo currently prepares plans, assets, prospect research and outreach drafts. It does not independently send messages, publish content, spend money or run scheduled jobs.</p>
     </section>
 
     <section id="gosolo-account" aria-labelledby="gosolo-account-title">
@@ -117,8 +118,8 @@
       </div>
     </section>
 
-    <section class="panel" id="subscription-panel"><h2>Free preview</h2><p class="muted">Explore your personalized business preview first. Subscribe for $29/month to unlock the full launch assets and operator tools.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Subscribe for $29/month</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button><div id="free-preview" class="item hidden"></div></section>
-    <section class="panel">
+    <section class="panel" id="subscription-panel"><h2>Unlock your AI business operator</h2><p class="muted">Get the full GoSolo business-building workspace for $29/month. Subscribe once, then build your business and manage its launch work from one dashboard.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Subscribe to GoSolo®</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button></section>
+    <section class="panel hidden" id="business-builder-panel">
       <h2>Start your business</h2>
       <p class="muted">Describe what you want to build. GOSOLO AI will generate an operator dashboard and a practical first version.</p>
       <form id="businessForm">
@@ -447,7 +448,7 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
             skills: document.getElementById("skills").value.trim(),
             budget: document.getElementById("budget").value,
             goal: document.getElementById("goal").value,
-            preview: true
+            preview: false
           })
         });
 
@@ -893,6 +894,8 @@ $("acq-export").addEventListener("click", function () {
       active = !!(r.ok && d.active);
       status.textContent = active ? "Subscription active. Operator tools unlocked." : "Free preview available. Subscribe to unlock full business building.";
       document.getElementById("customer-acquisition")?.classList.toggle("hidden", !active);
+      document.getElementById("business-builder-panel")?.classList.toggle("hidden", !active);
+      document.getElementById("dashboard")?.classList.toggle("hidden", !active);
       subscribe.classList.toggle("hidden", active);
       manage.classList.toggle("hidden", !active);
     } catch { status.textContent = "Unable to check subscription. Refresh and try again."; }
