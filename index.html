@@ -532,6 +532,7 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
   <button type="button" id="acq-search">Create search links</button>
   <button type="button" id="acq-research">Research prospects with AI</button>
   <p id="acq-research-status" class="acq-muted" aria-live="polite">Search public web results for potential customers. Review every result before saving or contacting anyone.</p>
+  <button type="button" id="acq-save-all" hidden>Save all results for review</button>
   <div id="acq-research-results"></div>
   <div id="acq-links"></div>
   <p class="acq-muted">Search results are leads to review, not confirmed buyers. GoSolo will never contact anyone automatically.</p>
@@ -581,6 +582,8 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
   const $ = id => document.getElementById(id);
   const storageKey = "gosolo ai_leads_v1";
   let leads = [];
+  let lastResearchResults = [];
+  let lastResearchService = "";
 
   try {
     leads = JSON.parse(localStorage.getItem(storageKey) || "[]");
@@ -662,6 +665,30 @@ if (summary) {
     ).join("");
   }
 
+  $("acq-save-all").addEventListener("click", function () {
+    const fresh = lastResearchResults.filter(item =>
+      item && item.url && !leads.some(lead => lead.sourceUrl === item.url)
+    );
+    if (!fresh.length) {
+      $("acq-research-status").textContent = "Every result is already saved.";
+      return;
+    }
+    const saved = fresh.map(item => ({
+      name: item.title || "Unverified prospect",
+      contact: item.url,
+      need: lastResearchService,
+      source: "Firecrawl public web search",
+      sourceUrl: item.url,
+      notes: item.description || "Review the source and verify buying intent.",
+      status: "New"
+    }));
+    leads = [...saved.reverse(), ...leads];
+    save();
+    $("acq-save-all").disabled = true;
+    $("acq-save-all").textContent = "Saved " + saved.length + " prospects";
+    $("acq-research-status").textContent = saved.length + " results saved for review. Cloud sync has been queued. No messages were sent.";
+  });
+
   $("acq-research").addEventListener("click", async function () {
     const service = $("acq-service").value.trim();
     const area = $("acq-area").value.trim();
@@ -676,6 +703,11 @@ if (summary) {
     button.disabled = true;
     status.textContent = "Searching public web sources for potential customers...";
     resultsBox.innerHTML = "";
+    lastResearchResults = [];
+    lastResearchService = "";
+    $("acq-save-all").hidden = true;
+    $("acq-save-all").disabled = false;
+    $("acq-save-all").textContent = "Save all results for review";
 
     try {
       const response = await fetch("/api/prospects", {
@@ -692,7 +724,10 @@ if (summary) {
         return;
       }
 
-      status.textContent = data.results.length + " public search results found. Review them and save only genuine prospects.";
+      lastResearchResults = data.results;
+      lastResearchService = service;
+      $("acq-save-all").hidden = false;
+      status.textContent = data.results.length + " public search results found. Review them, then save individually or all for review.";
       resultsBox.innerHTML = data.results.map((item, i) =>
         '<div class="acq-card">' +
           '<strong>' + escapeHTML(item.title || "Untitled result") + '</strong>' +
