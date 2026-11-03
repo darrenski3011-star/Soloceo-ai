@@ -50,39 +50,72 @@ Known need: ${need || "Not verified"}
 Research notes: ${notes || "None"}`;
 
     const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.5, maxOutputTokens: 350 }
-        }),
-        signal: AbortSignal.timeout(20000)
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent";
+    let lastMessage = "AI could not prepare the draft. Please try again.";
+
+    // Retry temporary Gemini overloads once. Never send the draft automatically.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let response;
+      let raw = "";
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+          },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.5, maxOutputTokens: 350 }
+          }),
+          signal: AbortSignal.timeout(25000)
+        });
+        raw = await response.text();
+      } catch (error) {
+        console.error("GoSolo draft Gemini request failed:", error.name, error.message);
+        const timeout = error.name === "TimeoutError" || error.name === "AbortError";
+        return res.status(502).json({
+          error: timeout
+            ? "AI drafting took too long. Your prospect is still saved. Press Prepare draft to retry."
+            : "AI drafting could not connect. Your prospect is still saved. Please retry."
+        });
       }
-    );
 
-    const raw = await response.text();
-    let data = {};
-    try { data = JSON.parse(raw); } catch {}
+      let data = {};
+      try { data = JSON.parse(raw); } catch {}
 
-    if (!response.ok) {
-      console.error("GoSolo draft Gemini error:", response.status, raw.slice(0, 400));
-      return res.status(502).json({
-        error: data?.error?.message || "AI could not prepare the draft. Check the Gemini model setting and try again."
-      });
+      if (!response.ok) {
+        const message = data?.error?.message || "Gemini returned HTTP " + response.status;
+        console.error("GoSolo draft Gemini error:", response.status, raw.slice(0, 400));
+        lastMessage = response.status === 404
+          ? "The configured Gemini model was not found. Check GEMINI_MODEL in Vercel."
+          : response.status === 429 || response.status >= 500
+            ? "Gemini is temporarily busy. Your prospect is saved; try preparing the draft again."
+            : message;
+        const retryable = [429, 500, 502, 503, 504].includes(response.status);
+        if (retryable && attempt === 0) {
+          await new Promise(resolve => setTimeout(resolve, 900));
+          continue;
+        }
+        return res.status(502).json({ error: lastMessage });
+      }
+
+      const draft = data?.candidates?.[0]?.content?.parts
+        ?.map(part => part.text || "").join("").trim();
+
+      if (!draft) {
+        const reason = data?.promptFeedback?.blockReason;
+        return res.status(502).json({
+          error: reason
+            ? "Gemini could not draft this message because the request was blocked (" + reason + "). Edit the prospect details and retry."
+            : "AI returned an empty draft. Your prospect is still saved; please retry."
+        });
+      }
+
+      return res.status(200).json({ success: true, draft });
     }
 
-    const draft = data?.candidates?.[0]?.content?.parts
-      ?.map(part => part.text || "").join("").trim();
-
-    if (!draft) return res.status(502).json({ error: "AI returned an empty draft. Please try again." });
-
-    return res.status(200).json({ success: true, draft });
+    return res.status(502).json({ error: lastMessage });
   } catch (error) {
     console.error("GoSolo outreach draft error:", error);
     return res.status(502).json({ error: "Could not prepare the outreach draft. Please try again." });
