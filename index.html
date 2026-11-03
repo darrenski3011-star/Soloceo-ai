@@ -573,7 +573,7 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
 <button type="button" id="acq-export">Export prospects backup (CSV)</button>
 
   <div id="acq-pipeline"><p class="acq-muted">Your saved prospects will appear here.</p></div>
-  <p class="acq-muted">Prospects are stored in this browser on this device. This is a first version, not a cloud-synced CRM.</p>
+  <p class="acq-muted">Prospects are saved on this device and synced to your GoSolo account when you are signed in.</p>
 </section>
 
 <script>
@@ -893,6 +893,14 @@ $("acq-export").addEventListener("click", function () {
       $("acq-message").focus();
       $("acq-message").select();
       alert("Select and copy the draft manually.");
+    }
+  });
+
+  window.addEventListener("gosolo:cloud-synced", function (event) {
+    const synced = event.detail && event.detail.prospects;
+    if (Array.isArray(synced)) {
+      leads = synced;
+      render();
     }
   });
 
