@@ -13,6 +13,7 @@ if (!panel || !status || !authForm || !signedIn) {
 } else {
   const base = url.replace(/\/$/, "");
   const storageKey = "gosolo ai_leads_v1";
+  const operatorStorageKey = "gosolo_ai_operator_v1";
   const sessionKey = "gosolo_supabase_session_v1";
   let session = null;
   let syncing = false;
@@ -119,6 +120,7 @@ if (!panel || !status || !authForm || !signedIn) {
         saveSession(data);
         showUser(data.user);
         await syncProspects();
+      await syncOperator();
       } else {
         status.textContent = "Account created. Check your email for the confirmation link, then return here and log in.";
       }
@@ -143,12 +145,36 @@ if (!panel || !status || !authForm || !signedIn) {
       saveSession(data);
       showUser(data.user);
       await syncProspects();
+      await syncOperator();
     } catch (error) {
       status.textContent = error.message || "Login failed.";
     } finally {
       setBusy(button, false);
     }
   });
+
+  async function syncOperator() {
+    if (!session?.access_token) return;
+    const token = await validAccessToken();
+    const userId = session?.user?.id;
+    if (!userId) throw new Error("Your account session is incomplete. Log out and log in again.");
+    const local = JSON.parse(localStorage.getItem(operatorStorageKey) || "null");
+    const path = "/rest/v1/user_data?select=data&data_key=eq.operator&user_id=eq." + encodeURIComponent(userId);
+    const read = await request(path, {}, token);
+    const cloudOperator = read?.[0]?.data || null;
+    const operator = local || cloudOperator;
+    if (!operator) return;
+    if (local) {
+      await request("/rest/v1/user_data?on_conflict=user_id,data_key", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+        body: JSON.stringify({ user_id: userId, data_key: "operator", data: operator })
+      }, token);
+    } else {
+      localStorage.setItem(operatorStorageKey, JSON.stringify(operator));
+      window.dispatchEvent(new CustomEvent("gosolo:operator-restored", { detail: { operator } }));
+    }
+  }
 
   async function syncProspects() {
     if (syncing) {
@@ -203,7 +229,8 @@ if (!panel || !status || !authForm || !signedIn) {
   $("gosolo-sync").addEventListener("click", async () => {
     const button = $("gosolo-sync");
     setBusy(button, true, "Syncing...");
-    try { await syncProspects(); }
+    try { await syncProspects();
+      await syncOperator(); }
     catch (error) { status.textContent = error.message || "Cloud sync failed."; }
     finally { setBusy(button, false); }
   });
@@ -230,6 +257,14 @@ if (!panel || !status || !authForm || !signedIn) {
     if (key === storageKey) window.dispatchEvent(new CustomEvent("gosolo:prospects-updated"));
   };
 
+  window.addEventListener("gosolo:operator-updated", () => {
+    if (session?.access_token) {
+      syncOperator().catch(error => {
+        status.textContent = "Business workspace sync needs attention: " + (error.message || "unknown error");
+      });
+    }
+  });
+
   window.addEventListener("gosolo:prospects-updated", () => {
     if (session?.access_token && !syncing) {
       syncProspects().catch(error => {
@@ -253,6 +288,7 @@ if (!panel || !status || !authForm || !signedIn) {
       if (session?.access_token && session?.user) {
         showUser(session.user);
         await syncProspects();
+      await syncOperator();
       } else {
         showUser(null);
       }
