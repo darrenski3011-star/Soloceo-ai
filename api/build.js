@@ -12,15 +12,21 @@ export default async function handler(req, res) {
     });
   }
 
-  const previewMode = req.body?.preview === true;
-
-  if (!previewMode) {
-    try {
-      const access = await getActiveSubscription(req);
-      if (!access) return res.status(402).json({ success: false, error: "A GoSolo subscription is required to build and operate a business. Subscribe to unlock this feature." });
-    } catch (error) {
-      return res.status(503).json({ success: false, error: error.message || "Subscription verification is unavailable." });
+  // Every business build requires a verified active Stripe subscription.
+  // Do not trust a client-supplied preview flag to bypass payment.
+  try {
+    const access = await getActiveSubscription(req);
+    if (!access) {
+      return res.status(402).json({
+        success: false,
+        error: "Subscribe to GoSolo to unlock your complete business build."
+      });
     }
+  } catch (error) {
+    return res.status(503).json({
+      success: false,
+      error: error.message || "Subscription verification is unavailable."
+    });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -280,22 +286,9 @@ Limit priorities to 3, tasks to 5, and assets to 3.
         Array.isArray(operator.assumptions)
           ? operator.assumptions : [];
 
-      if (previewMode) {
-        operator.previewMode = true;
-        operator.assets = operator.assets.slice(0, 2).map(asset => ({
-          ...asset,
-          content: String(asset.content || "").slice(0, 180) + " Unlock the full asset after subscribing."
-        }));
-        operator.tasks = [];
-        operator.approvalQueue = [];
-        operator.metrics = [];
-        operator.assumptions = operator.assumptions.slice(0, 2);
-        operator.nextAction = "Unlock the complete business package to access your full assets and operator workspace.";
-      }
-
       return res.status(200).json({
         success: true,
-        preview: previewMode,
+        preview: false,
         operator
       });
     }
