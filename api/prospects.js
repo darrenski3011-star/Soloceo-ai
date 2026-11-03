@@ -20,6 +20,9 @@ export default async function handler(req, res) {
     }
 
     const apiKey = process.env.FIRECRAWL_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ error: "Prospect research is not connected yet. Add FIRECRAWL_API_KEY to the GoSolo Vercel project environment variables, then redeploy." });
+    }
     const response = await fetch("https://api.firecrawl.dev/v2/search", {
       method: "POST",
       headers: {
@@ -27,7 +30,7 @@ export default async function handler(req, res) {
         ...(apiKey ? { Authorization: "Bearer " + apiKey } : {})
       },
       body: JSON.stringify({
-        query: '("looking for ' + service + '" OR "need ' + service + '" OR "' + service + ' recommendation") "' + area + '"',
+        query: '("looking for " OR "need " OR "recommend " OR "hire " OR "requesting ") "' + service + '" "' + area + '"',
         limit: 10,
         sources: ["web"]
       }),
