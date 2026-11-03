@@ -197,9 +197,21 @@
         <h2>Assumptions to verify</h2>
         <div id="assumptions"></div>
       </div>
+      <div class="panel" id="operator-control-panel">
+        <h2>Daily AI Operator</h2>
+        <p class="muted">Start the operator to queue daily internal work: improve the plan, prepare business assets, organize tasks and identify decisions that need your approval. It never contacts customers, publishes, spends money or makes commitments.</p>
+        <div class="account-row">
+          <button class="button" id="operator-start" type="button">Start My Operator</button>
+          <button class="button secondary" id="operator-pause" type="button">Pause Operator</button>
+          <button class="button secondary" id="operator-refresh" type="button">Refresh Status</button>
+        </div>
+        <div id="operator-status" class="status" role="status" aria-live="polite">Operator not started.</div>
+        <h3>Latest operator activity</h3>
+        <div id="operator-activity"><p class="muted">No background work has run yet.</p></div>
+      </div>
     </section>
 
-    <footer> GOSOLO AI currently generates plans and draft assets. It does not autonomously contact customers, publish content, spend money, or run scheduled jobs.</footer>
+    <footer> GoSolo prepares business plans, research and drafts, and can run scheduled internal operator cycles when background services are configured. It does not independently contact customers, publish content, spend money or make commitments.</footer>
   </main>
 
   <script>
@@ -521,6 +533,77 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
 
     document.getElementById("copyPlanButton").addEventListener("click", () => {
       if (latestOperator) copyText(JSON.stringify(latestOperator, null, 2));
+    });
+
+    const operatorStatus = document.getElementById("operator-status");
+    const operatorActivity = document.getElementById("operator-activity");
+    function operatorToken() {
+      try {
+        const session = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null");
+        return session?.access_token || "";
+      } catch (_) { return ""; }
+    }
+    function showOperatorWorkspace(workspace) {
+      if (!workspace) {
+        operatorStatus.textContent = "No operator workspace found. Build your business, then start the operator.";
+        return;
+      }
+      operatorStatus.textContent = workspace.status === "active"
+        ? "Operator ACTIVE. Next internal work cycle: " + (workspace.next_run_at ? new Date(workspace.next_run_at).toLocaleString() : "queued")
+        : "Operator PAUSED." + (workspace.last_error ? " Last issue: " + workspace.last_error : "");
+      const business = workspace.business || latestOperator || {};
+      const combined = { ...business, tasks: workspace.tasks || [], assets: workspace.assets || [], approvalQueue: workspace.approval_queue || [] };
+      if (latestOperator) renderOperator(combined, true);
+      operatorActivity.replaceChildren();
+      const entries = Array.isArray(workspace.activity) ? workspace.activity : [];
+      if (!entries.length) {
+        addText(operatorActivity, "p", "Your first daily work cycle is queued. The operator will add its results here.", "muted");
+      } else {
+        entries.slice(0, 8).forEach(entry => {
+          const item = document.createElement("div");
+          item.className = "item";
+          item.style.marginTop = "8px";
+          addText(item, "strong", entry.summary || "Internal work completed");
+          if (entry.next_action) addText(item, "p", "Next: " + entry.next_action);
+          if (entry.at) addText(item, "p", new Date(entry.at).toLocaleString(), "muted");
+          operatorActivity.appendChild(item);
+        });
+      }
+    }
+    async function operatorRequest(method, payload) {
+      const token = operatorToken();
+      if (!token) throw new Error("Log in to your GoSolo customer account first.");
+      const response = await fetch("/api/operator", {
+        method,
+        headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": "Bearer " + token },
+        ...(payload ? { body: JSON.stringify(payload) } : {})
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Operator request failed (" + response.status + ").");
+      return data;
+    }
+    document.getElementById("operator-start").addEventListener("click", async () => {
+      if (!latestOperator) {
+        operatorStatus.textContent = "Build your business first.";
+        return;
+      }
+      const button = document.getElementById("operator-start");
+      button.disabled = true;
+      operatorStatus.textContent = "Starting your daily operator...";
+      try {
+        const data = await operatorRequest("POST", { action: "start", business: latestOperator });
+        showOperatorWorkspace(data.workspace);
+      } catch (error) {
+        operatorStatus.textContent = error.message || "Could not start the operator.";
+      } finally { button.disabled = false; }
+    });
+    document.getElementById("operator-pause").addEventListener("click", async () => {
+      try { const data = await operatorRequest("POST", { action: "pause" }); showOperatorWorkspace(data.workspace); }
+      catch (error) { operatorStatus.textContent = error.message || "Could not pause the operator."; }
+    });
+    document.getElementById("operator-refresh").addEventListener("click", async () => {
+      try { const data = await operatorRequest("GET"); showOperatorWorkspace(data.workspace); }
+      catch (error) { operatorStatus.textContent = error.message || "Could not load operator status."; }
     });
 
     window.addEventListener("gosolo:operator-restored", event => {
