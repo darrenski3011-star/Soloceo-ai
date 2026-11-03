@@ -73,6 +73,14 @@
     .task label { margin:0; font-weight:500; }
     .asset { margin:10px 0; }
     .asset pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#031509; border:1px solid #20482b; border-radius:8px; padding:12px; }
+    .locked-preview{position:relative;overflow:hidden}
+    .locked-preview-content{filter:blur(7px);opacity:.72;user-select:none;pointer-events:none}
+    .locked-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:linear-gradient(180deg,rgba(3,27,10,.25),rgba(3,27,10,.94));}
+    .locked-overlay h3{font-size:1.2rem;color:var(--green)}
+    .revenue-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .revenue-card{padding:14px;border:1px solid var(--border);border-radius:12px;background:#041b0c;text-align:center}
+    .revenue-number{display:block;color:var(--green);font-size:1.45rem;font-weight:900}
+    @media(max-width:650px){.revenue-grid{grid-template-columns:1fr}}
     footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:24px; }
     @media(max-width:650px) { .grid,.cards { grid-template-columns:1fr; } .panel { padding:16px; } }
   </style>
@@ -98,6 +106,36 @@
       <p class="muted">Your subscription unlocks the full business-building workspace. GoSolo currently prepares plans, assets, prospect research and outreach drafts. It does not independently send messages, publish content, spend money or run scheduled jobs.</p>
       <p><strong>Ready to get started?</strong></p>
       <h2>Subscribe to GoSolo</h2>
+    </section>
+
+    <section class="panel" id="potential-revenue">
+      <h2>What could your business generate with GoSolo?</h2>
+      <p class="muted">Here are simple revenue illustrations showing what recurring customers can add up to. Your actual results depend on the offer, pricing, demand and sales.</p>
+      <div class="revenue-grid">
+        <div class="revenue-card"><span class="revenue-number">$500/mo</span><strong>5 customers</strong><p class="muted">$100 per month each</p></div>
+        <div class="revenue-card"><span class="revenue-number">$1,500/mo</span><strong>10 customers</strong><p class="muted">$150 per month each</p></div>
+        <div class="revenue-card"><span class="revenue-number">$5,000/mo</span><strong>25 customers</strong><p class="muted">$200 per month each</p></div>
+      </div>
+      <p class="muted">Illustrative gross revenue only, not a forecast or guarantee. It excludes expenses, taxes, refunds and customer churn. GoSolo cannot guarantee customers or income.</p>
+    </section>
+
+    <section class="panel locked-preview" id="locked-plan-preview" aria-label="Locked business plan preview">
+      <div class="locked-preview-content" aria-hidden="true">
+        <h2>Your personalized business blueprint</h2>
+        <div class="cards">
+          <div class="item"><h3>Business model</h3><p>Personalized business concept, offer and recurring-revenue structure based on your goals.</p></div>
+          <div class="item"><h3>Target customers</h3><p>Ideal customer profile, market opportunity and customer acquisition strategy.</p></div>
+          <div class="item"><h3>Pricing and offer</h3><p>Suggested packages, monthly pricing and value proposition.</p></div>
+          <div class="item"><h3>Launch assets</h3><p>Brand direction, landing-page copy, promotional content and outreach drafts.</p></div>
+        </div>
+        <h3 style="margin-top:16px">Your action plan and operator workspace</h3>
+        <p>Priorities, prospect research, daily work queue, performance metrics and approval requests.</p>
+      </div>
+      <div class="locked-overlay">
+        <h3><span aria-hidden="true">🔒</span> Your business blueprint is locked</h3>
+        <p>Subscribe to GoSolo to unlock your personalized business build, launch assets and operator workspace.</p>
+        <button class="button" type="button" onclick="document.getElementById('subscription-panel').scrollIntoView({behavior:'smooth',block:'center'})">Subscribe to GoSolo</button>
+      </div>
     </section>
 
     <section id="gosolo-account" aria-labelledby="gosolo-account-title">
