@@ -249,6 +249,20 @@
       </div>
     </section>
 
+    <section class="panel hidden" id="gosolo-gmail-panel">
+      <h2>Gmail outreach workspace</h2>
+      <p class="muted">Connect your business Gmail account and prepare prospect emails for review. GoSolo will not send anything automatically.</p>
+      <button class="button secondary" id="gosolo-gmail-connect" type="button">Connect Gmail</button>
+      <button class="button secondary" id="gosolo-gmail-refresh" type="button">Refresh connection</button>
+      <p id="gosolo-gmail-status" class="status" role="status" aria-live="polite">Gmail connection not checked.</p>
+      <label for="gosolo-gmail-recipient">Prospect email</label>
+      <input id="gosolo-gmail-recipient" type="email" placeholder="prospect@example.com">
+      <label for="gosolo-gmail-subject">Email subject</label>
+      <input id="gosolo-gmail-subject" type="text" maxlength="180" placeholder="A quick idea for your business">
+      <label for="gosolo-gmail-body">Message draft</label>
+      <textarea id="gosolo-gmail-body" maxlength="12000" placeholder="Review and personalize your message..."></textarea>
+      <button class="button" id="gosolo-gmail-queue" type="button">Save draft for approval</button>
+    </section>
     <footer> GoSolo prepares business plans, research and drafts, and can run scheduled internal operator cycles when background services are configured. It does not independently contact customers, publish content, spend money or make commitments.</footer>
   </main>
 
@@ -1161,5 +1175,6 @@ $("acq-export").addEventListener("click", function () {
 })();
 </script>
   <script type="module" src="/src/cloud.js"></script>
+  <script type="module" src="/src/gmail.js"></script>
 </body>
 </html>
