@@ -4,6 +4,8 @@ const panel = $("gosolo-gmail-panel");
 if (panel) {
   const sessionKey = "gosolo_supabase_session_v1";
 
+  let queuedId = null;
+
   function getSession() {
     try { return JSON.parse(localStorage.getItem(sessionKey) || "null"); }
     catch { return null; }
@@ -76,10 +78,34 @@ if (panel) {
         subject: $("gosolo-gmail-subject").value,
         body: $("gosolo-gmail-body").value
       });
-      showStatus(data.message || "Draft saved for approval. Nothing was sent.");
+      queuedId = data.approval?.id || null;
+      $("gosolo-gmail-send").disabled = !queuedId;
+      showStatus(data.message || "Draft saved for approval. Nothing was sent. Review it, then explicitly approve sending.");
     } catch (error) {
       showStatus(error.message, true);
     } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("gosolo-gmail-send").addEventListener("click", async () => {
+    if (!queuedId) {
+      showStatus("Save an outreach draft first.", true);
+      return;
+    }
+    if (!confirm("Send this email now from your connected Gmail account? This will contact the recipient.")) return;
+    const button = $("gosolo-gmail-send");
+    button.disabled = true;
+    try {
+      await callApi("/api/outreach/approve", "POST", { id: queuedId });
+      const sent = await callApi("/api/outreach/send", "POST", { id: queuedId });
+      showStatus("Email sent successfully. Gmail message ID: " + (sent.messageId || "confirmed"));
+      queuedId = null;
+      $("gosolo-gmail-recipient").value = "";
+      $("gosolo-gmail-subject").value = "";
+      $("gosolo-gmail-body").value = "";
+    } catch (error) {
+      showStatus(error.message, true);
       button.disabled = false;
     }
   });
