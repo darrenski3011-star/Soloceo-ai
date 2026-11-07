@@ -1,4 +1,4 @@
-import { clearSessionCookie, getActiveSubscription, setSessionCookie, stripeRequest } from "../lib/billing.js";
+import { clearSessionCookie, getActiveSubscription, getGoSoloAccess, setSessionCookie, stripeRequest } from "../lib/billing.js";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -38,12 +38,14 @@ export default async function handler(req, res) {
     }
 
     if (action === "status" && req.method === "GET") {
-      const active = await getActiveSubscription(req);
-      if (!active) return res.status(200).json({ active: false });
+      const access = await getGoSoloAccess(req);
+      if (!access) return res.status(200).json({ active: false, owner: false });
+      if (access.owner) return res.status(200).json({ active: true, owner: true, status: "owner" });
       return res.status(200).json({
         active: true,
-        status: active.subscription.status,
-        currentPeriodEnd: active.subscription.current_period_end
+        owner: false,
+        status: access.subscription.status,
+        currentPeriodEnd: access.subscription.current_period_end
       });
     }
 
