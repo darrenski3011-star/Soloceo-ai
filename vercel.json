@@ -27,6 +27,14 @@
     }
   ],
   "crons": [
-    { "path": "/api/cron/operator", "schedule": "0 15 * * *" }
-  ]
+    {
+      "path": "/api/cron/operator",
+      "schedule": "0 15 * * *"
+    }
+  ],
+  "functions": {
+    "api/build.js": {
+      "maxDuration": 60
+    }
+  }
 }
