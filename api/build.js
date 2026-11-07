@@ -1,5 +1,5 @@
 
-import { getActiveSubscription } from "../lib/billing.js";
+import { getGoSoloAccess } from "../lib/billing.js";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -12,14 +12,14 @@ export default async function handler(req, res) {
     });
   }
 
-  // Every business build requires a verified active Stripe subscription.
-  // Do not trust a client-supplied preview flag to bypass payment.
+  // Customer builds require a verified Stripe subscription. The owner exception
+  // is granted only to the authenticated Supabase account on the server.
   try {
-    const access = await getActiveSubscription(req);
+    const access = await getGoSoloAccess(req);
     if (!access) {
       return res.status(402).json({
         success: false,
-        error: "Subscribe to GoSolo to unlock your complete business build."
+        error: "Subscribe to GoSolo to unlock your complete business build, or sign in with the authorized owner account."
       });
     }
   } catch (error) {
