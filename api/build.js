@@ -121,7 +121,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 `;
 
     // Use the model configured for this request.
-    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+    const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
     const url =
       "https://generativelanguage.googleapis.com/v1beta/models/" +
@@ -136,7 +136,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 
       const timer = setTimeout(
         () => controller.abort(),
-        50000
+        35000
       );
 
             let response;
@@ -158,7 +158,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
             ],
             generationConfig: {
               temperature: 0.4,
-              maxOutputTokens: 1200,
+              maxOutputTokens: 800,
               responseMimeType: "application/json"
             }
           }),
