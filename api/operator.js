@@ -1,6 +1,6 @@
 export const config = { maxDuration: 60 };
 
-import { getActiveSubscription } from "../lib/billing.js";
+import { getGoSoloAccess } from "../lib/billing.js";
 
 const base = () => (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
 const anon = () => process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
@@ -59,12 +59,14 @@ export default async function handler(req, res) {
   if (!["GET", "POST"].includes(req.method)) return res.status(405).json({ error: "Use GET or POST." });
 
   try {
-    const access = await getActiveSubscription(req);
-    if (!access) return res.status(402).json({ error: "An active GoSolo subscription is required to run the operator." });
     const user = await getUser(req);
-    const checkoutEmail = access.checkout.customer_details?.email || access.checkout.customer_email || "";
-    if (checkoutEmail && emailOf(checkoutEmail) !== emailOf(user.email)) {
-      return res.status(403).json({ error: "Your GoSolo account email must match the email on your subscription." });
+    const access = await getGoSoloAccess(req);
+    if (!access) return res.status(402).json({ error: "An active GoSolo subscription is required to run the operator." });
+    if (!access.owner) {
+      const checkoutEmail = access.checkout.customer_details?.email || access.checkout.customer_email || "";
+      if (checkoutEmail && emailOf(checkoutEmail) !== emailOf(user.email)) {
+        return res.status(403).json({ error: "Your GoSolo account email must match the email on your subscription." });
+      }
     }
 
     const query = "/rest/v1/operator_workspaces?select=*&user_id=eq." + encodeURIComponent(user.id);
@@ -87,7 +89,7 @@ export default async function handler(req, res) {
       }
       const record = {
         user_id: user.id,
-        stripe_session_id: access.checkout.id,
+        stripe_session_id: access.owner ? "owner:" + user.id : access.checkout.id,
         business,
         tasks: current?.tasks || business.tasks || [],
         assets: current?.assets || business.assets || [],
