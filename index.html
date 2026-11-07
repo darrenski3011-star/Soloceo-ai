@@ -538,7 +538,7 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
       try {
         const response = await fetch("/api/build", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          headers: { "Content-Type": "application/json", "Accept": "application/json", "Authorization": "Bearer " + (JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "") },
           body: JSON.stringify({
             business,
             skills: document.getElementById("skills").value.trim(),
@@ -890,7 +890,7 @@ if (summary) {
     try {
       const response = await fetch("/api/prospects", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "") },
         body: JSON.stringify({ service, area })
       });
       const data = await response.json();
@@ -1066,7 +1066,7 @@ $("acq-export").addEventListener("click", function () {
     try {
       const response = await fetch("/api/draft", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "") },
         body: JSON.stringify({
           prospect: lead,
           service: $("acq-service").value.trim() || "my services",
@@ -1131,7 +1131,8 @@ $("acq-export").addEventListener("click", function () {
   let owner = false;
   async function refresh() {
     try {
-      const r = await fetch("/api/billing?action=status");
+      const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
+      const r = await fetch("/api/billing?action=status", { headers: token ? { "Authorization": "Bearer " + token } : {} });
       const d = await r.json();
       active = !!(r.ok && d.active);
       owner = !!(r.ok && d.owner);
