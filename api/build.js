@@ -1,6 +1,9 @@
 
 import { getGoSoloAccess } from "../lib/billing.js";
 
+// Allow Gemini enough time to finish on Vercel before the platform deadline.
+export const config = { maxDuration: 60 };
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -133,7 +136,7 @@ Limit priorities to 3, tasks to 5, and assets to 3.
 
       const timer = setTimeout(
         () => controller.abort(),
-        20000
+        50000
       );
 
             let response;
