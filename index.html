@@ -1128,17 +1128,19 @@ $("acq-export").addEventListener("click", function () {
   const subscribe = document.getElementById("subscribe-button");
   const manage = document.getElementById("manage-subscription-button");
   let active = false;
+  let owner = false;
   async function refresh() {
     try {
       const r = await fetch("/api/billing?action=status");
       const d = await r.json();
       active = !!(r.ok && d.active);
-      status.textContent = active ? "Subscription active. Operator tools unlocked." : "No active subscription. Subscribe to unlock your business-building workspace.";
+      owner = !!(r.ok && d.owner);
+      status.textContent = owner ? "Owner access verified. Your GoSolo workspace is unlocked." : active ? "Subscription active. Operator tools unlocked." : "No active subscription. Subscribe to unlock your business-building workspace.";
       document.getElementById("customer-acquisition")?.classList.toggle("hidden", !active);
       document.getElementById("business-builder-panel")?.classList.toggle("hidden", !active);
       document.getElementById("dashboard")?.classList.toggle("hidden", !active);
       subscribe.classList.toggle("hidden", active);
-      manage.classList.toggle("hidden", !active);
+      manage.classList.toggle("hidden", !active || owner);
     } catch { status.textContent = "Unable to check subscription. Refresh and try again."; }
   }
   subscribe.addEventListener("click", async () => {
