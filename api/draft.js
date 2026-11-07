@@ -1,4 +1,4 @@
-import { getActiveSubscription } from "../lib/billing.js";
+import { getGoSoloAccess } from "../lib/billing.js";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const access = await getActiveSubscription(req);
+    const access = await getGoSoloAccess(req);
     if (!access) {
       return res.status(402).json({ error: "Subscribe to GoSolo to prepare AI outreach drafts." });
     }
