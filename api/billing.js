@@ -6,12 +6,17 @@ export default async function handler(req, res) {
 
   try {
     if (action === "checkout" && req.method === "POST") {
-      if (!process.env.STRIPE_PRICE_ID) throw new Error("The GoSolo monthly Stripe price is not configured yet.");
+      const priceId = String(process.env.STRIPE_PRICE_ID || "").trim().replace(/^["']+|["']+$/g, "");
+      if (!/^price_[A-Za-z0-9]+$/.test(priceId)) throw new Error("The GoSolo monthly Stripe price ID is missing or incorrectly formatted in Vercel.");
       if (!process.env.APP_SESSION_SECRET) throw new Error("APP_SESSION_SECRET is missing in Vercel.");
+      const price = await stripeRequest("prices/" + encodeURIComponent(priceId));
+      if (!price.active || price.type !== "recurring" || price.recurring?.interval !== "month") {
+        throw new Error("The configured GoSolo Stripe price must be active and billed monthly.");
+      }
       const origin = "https://" + (req.headers["x-forwarded-host"] || req.headers.host);
       const params = new URLSearchParams();
       params.set("mode", "subscription");
-      params.set("line_items[0][price]", process.env.STRIPE_PRICE_ID);
+      params.set("line_items[0][price]", priceId);
       params.set("line_items[0][quantity]", "1");
       params.set("success_url", origin + "/?checkout=success&session_id={CHECKOUT_SESSION_ID}");
       params.set("cancel_url", origin + "/?checkout=cancelled");
