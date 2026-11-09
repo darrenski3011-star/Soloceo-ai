@@ -50,6 +50,57 @@ async function triggerWorker() {
   return { started: true, processed: data.processed || 0, due: data.due || 0 };
 }
 
+
+async function warriorPlusRequest(path, params, apiKey) {
+  const url = new URL("https://warriorplus.com/api/v2" + path);
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
+  });
+  const response = await fetch(url, { headers: { apiKey, Accept: "application/json" }, signal: AbortSignal.timeout(20000) });
+  const raw = await response.text();
+  let data = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch { throw new Error("WarriorPlus returned an unreadable response."); }
+  if (response.status === 402) return { success: 1, data: [], has_more: "false", total_count: null };
+  if (!response.ok) {
+    const error = new Error(response.status === 401 ? "WarriorPlus rejected the saved API key. Recheck it in WarriorPlus and update Vercel if needed." : response.status === 429 ? "WarriorPlus rate limit reached. Wait and retry." : String(data.message || data.error || "WarriorPlus request failed."));
+    error.status = response.status === 401 ? 502 : response.status === 429 ? 429 : 502;
+    throw error;
+  }
+  return data;
+}
+
+async function handleWarriorPlus(req, res) {
+  const apiKey = String(process.env.WARRIORPLUS_API_KEY || "").trim();
+  if (!apiKey) return res.status(503).json({ connected: false, error: "WARRIORPLUS_API_KEY is not configured in Vercel." });
+  const action = String(req.query?.action || "overview").toLowerCase();
+  const parsedLimit = Number.parseInt(String(req.query?.limit || "25"), 10);
+  const limit = Number.isFinite(parsedLimit) ? Math.max(1, Math.min(100, parsedLimit)) : 25;
+  const cursor = String(req.query?.starting_after || "").trim();
+  const pagination = { limit, ...( /^[A-Za-z0-9_-]{1,100}$/.test(cursor) ? { starting_after: cursor } : {}) };
+  const endpoints = {
+    products: ["/products", pagination],
+    offers: ["/offers", pagination],
+    sales: ["/sales", { ...pagination, ...(req.query?.as === "affiliate" ? { as: "affiliate" } : {}) }],
+    purchases: ["/purchases", pagination]
+  };
+  if (action === "status") {
+    const check = await warriorPlusRequest("/products", { limit: 1 }, apiKey);
+    return res.status(200).json({ connected: true, provider: "WarriorPlus", api: "v2", checkedAt: new Date().toISOString(), productsAvailable: Array.isArray(check.data) ? check.data.length : 0 });
+  }
+  if (action === "overview") {
+    const entries = await Promise.all(Object.keys(endpoints).map(async key => {
+      const pair = endpoints[key];
+      const result = await warriorPlusRequest(pair[0], pair[1], apiKey);
+      return [key, { data: Array.isArray(result.data) ? result.data : [], has_more: result.has_more === "true", total_count: result.total_count ?? null }];
+    }));
+    return res.status(200).json({ connected: true, provider: "WarriorPlus", api: "v2", checkedAt: new Date().toISOString(), ...Object.fromEntries(entries) });
+  }
+  if (!endpoints[action]) return res.status(400).json({ error: "Choose status, overview, products, offers, sales, or purchases." });
+  const pair = endpoints[action];
+  const result = await warriorPlusRequest(pair[0], pair[1], apiKey);
+  return res.status(200).json({ connected: true, provider: "WarriorPlus", action, data: Array.isArray(result.data) ? result.data : [], has_more: result.has_more === "true", total_count: result.total_count ?? null });
+}
+
 function emailOf(value) {
   return String(value || "").trim().toLowerCase();
 }
@@ -66,6 +117,14 @@ export default async function handler(req, res) {
       const checkoutEmail = access.checkout.customer_details?.email || access.checkout.customer_email || "";
       if (checkoutEmail && emailOf(checkoutEmail) !== emailOf(user.email)) {
         return res.status(403).json({ error: "Your GoSolo account email must match the email on your subscription." });
+      }
+    }
+
+    if (req.method === "GET" && String(req.query?.resource || "").toLowerCase() === "warriorplus") {
+      try { return await handleWarriorPlus(req, res); }
+      catch (error) {
+        console.error("GoSolo WarriorPlus integration error:", error.message);
+        return res.status(error.status || 502).json({ connected: false, error: error.message || "WarriorPlus integration unavailable." });
       }
     }
 
