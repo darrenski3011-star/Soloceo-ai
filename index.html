@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Build your business with GoSolo AI. Create a business plan, launch assets, customer prospect lists and outreach drafts, with your approval before anything is sent or published.">
+  <meta name="description" content="GoSolo AI turns your business idea into a practical business workspace, launch assets and organized operator workflows, with your approval before external actions.">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="https://soloco-ai.vercel.app/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GoSolo AI">
   <meta property="og:title" content="GoSolo AI | Build and Operate Your Business">
-  <meta property="og:description" content="Build your business, prepare launch assets and organize customer outreach. You stay in control of spending, publishing and contact.">
+  <meta property="og:description" content="Turn your idea into a business workspace with AI-built assets, organized work and approval controls. You stay in charge.">
   <meta property="og:url" content="https://soloco-ai.vercel.app/">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="GoSolo AI | Build and Operate Your Business">
@@ -24,7 +24,7 @@
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Web",
     "url": "https://soloco-ai.vercel.app/",
-    "description": "An AI-assisted business operator for creating business plans, launch assets, customer prospect lists and outreach drafts, with user approval before external actions.",
+    "description": "An AI-assisted business operator that helps build business workspaces, launch assets and organized workflows, with user approval before external actions.",
     "offers": {
       "@type": "Offer",
       "price": "29",
@@ -81,6 +81,23 @@
     .revenue-card{padding:14px;border:1px solid var(--border);border-radius:12px;background:#041b0c;text-align:center}
     .revenue-number{display:block;color:var(--green);font-size:1.45rem;font-weight:900}
     @media(max-width:650px){.revenue-grid{grid-template-columns:1fr}}
+    .tour-layout{display:grid;grid-template-columns:minmax(210px,.8fr) minmax(0,1.5fr);gap:14px;margin-top:18px}
+    .tour-steps{display:grid;gap:9px;align-content:start}
+    .tour-step{display:flex;align-items:center;gap:12px;width:100%;padding:14px;text-align:left;border:1px solid var(--border);border-radius:12px;background:#041b0c;color:var(--text);font:inherit;font-weight:750;cursor:pointer}
+    .tour-step span{color:var(--blue);font-size:.82rem;font-weight:900}
+    .tour-step.active{border-color:var(--green);background:#0b3018;box-shadow:inset 3px 0 var(--green)}
+    .tour-screen{min-height:290px;padding:20px;border:1px solid #347044;border-radius:16px;background:linear-gradient(145deg,#0b3018,#04190b)}
+    .tour-screen-top{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.75rem;font-weight:800;letter-spacing:.08em}
+    .tour-live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+    .tour-screen h3{margin:18px 0 8px;font-size:1.35rem;color:var(--text)}
+    .tour-example{display:grid;gap:8px;margin-top:18px;padding:16px;border:1px solid #2d613b;border-radius:12px;background:#031509}
+    .tour-example-label{color:var(--green);font-size:.72rem;font-weight:900;letter-spacing:.1em}
+    .tour-example strong{font-size:1.05rem}
+    .tour-example-note{color:var(--muted);font-size:.86rem}
+    .tour-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px;flex-wrap:wrap}
+    .tour-controls .button{width:auto;margin:0}
+    .tour-disclaimer{font-size:.85rem;margin-top:14px}
+    @media(max-width:650px){.tour-layout{grid-template-columns:1fr}.tour-screen{min-height:0}.tour-controls{align-items:stretch}.tour-controls .button{width:100%}}
     footer { text-align:center; color:var(--muted); font-size:.85rem; margin-top:24px; }
     @media(max-width:650px) { .grid,.cards { grid-template-columns:1fr; } .panel { padding:16px; } }
   </style>
@@ -108,7 +125,36 @@
       <h2>Subscribe to GoSolo</h2>
     </section>
 
-    <section class="panel" id="potential-revenue">
+    
+<section class="panel" id="how-gosolo-works" aria-labelledby="how-gosolo-title">
+  <h2 id="how-gosolo-title">See GoSolo turn an idea into a business</h2>
+  <p class="muted">Take a quick guided tour. This sample shows the workflow and the decisions you control.</p>
+  <div class="tour-layout">
+    <div class="tour-steps" role="group" aria-label="GoSolo walkthrough steps">
+      <button class="tour-step active" type="button" data-tour-step="0" aria-pressed="true"><span>01</span> Share your idea</button>
+      <button class="tour-step" type="button" data-tour-step="1" aria-pressed="false"><span>02</span> GoSolo builds the workspace</button>
+      <button class="tour-step" type="button" data-tour-step="2" aria-pressed="false"><span>03</span> You review and direct the work</button>
+    </div>
+    <div class="tour-screen" aria-live="polite">
+      <div class="tour-screen-top"><span class="tour-live-dot"></span><span id="tour-counter">GOSOLO WALKTHROUGH · STEP 1 OF 3</span></div>
+      <h3 id="tour-heading">Start with the idea</h3>
+      <p id="tour-description">Tell GoSolo what kind of business you want to create, what you know how to do, and what limits it should respect.</p>
+      <div class="tour-example" id="tour-example">
+        <span class="tour-example-label">YOUR IDEA</span>
+        <strong>Help local home-service businesses respond to customer enquiries faster.</strong>
+        <span class="tour-example-note">Budget: $0 · Goal: recurring income</span>
+      </div>
+      <div class="tour-controls">
+        <span class="muted" id="tour-step-note">No technical skills required to describe your idea.</span>
+        <button class="button secondary" id="tour-next" type="button">Next step →</button>
+      </div>
+    </div>
+  </div>
+  <p class="muted tour-disclaimer">This is an illustrative product walkthrough, not a customer result or income guarantee. GoSolo prepares work for your review and does not independently spend money, publish content or contact customers.</p>
+  <button class="button" id="tour-cta" type="button">Explore the $29/month workspace</button>
+</section>
+
+<section class="panel" id="potential-revenue">
       <h2>What could your business generate with GoSolo?</h2>
       <p class="muted">Here are simple revenue illustrations showing what recurring customers can add up to. Your actual results depend on the offer, pricing, demand and sales.</p>
       <div class="revenue-grid">
@@ -515,6 +561,46 @@ if (acquisitionArea && !acquisitionArea.value.trim()) {
       dashboard.classList.remove("hidden");
       dashboard.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+
+    const tourSteps = [
+      { heading:"Start with the idea", description:"Tell GoSolo what kind of business you want to create, what you know how to do, and what limits it should respect.", label:"YOUR IDEA", example:"Help local home-service businesses respond to customer enquiries faster.", note:"Budget: $0 · Goal: recurring income", foot:"No technical skills required to describe your idea." },
+      { heading:"GoSolo assembles the business", description:"GoSolo researches the opportunity and prepares the business model, offer, pricing hypothesis, brand direction, launch assets and a prioritized work queue.", label:"YOUR WORKSPACE", example:"Business model · Target customers · Offer · Pricing · Launch assets · Priority actions", note:"One organized workspace, built around your idea.", foot:"You can review the work before taking action." },
+      { heading:"You stay in control", description:"Use the operator workspace to organize tasks, review drafts, track assumptions and direct internal work. External actions still require your approval.", label:"YOUR APPROVALS", example:"Review a customer message · Approve a content draft · Confirm a proposed next step", note:"No surprise spending, publishing or customer contact.", foot:"The AI prepares the work. You make the important calls." }
+    ];
+    let activeTourStep = 0;
+    function renderTourStep(index) {
+      activeTourStep = (index + tourSteps.length) % tourSteps.length;
+      const step = tourSteps[activeTourStep];
+      document.getElementById("tour-counter").textContent = "GOSOLO WALKTHROUGH · STEP " + (activeTourStep + 1) + " OF " + tourSteps.length;
+      document.getElementById("tour-heading").textContent = step.heading;
+      document.getElementById("tour-description").textContent = step.description;
+      const example = document.getElementById("tour-example");
+      example.replaceChildren();
+      const label = document.createElement("span");
+      label.className = "tour-example-label";
+      label.textContent = step.label;
+      const detail = document.createElement("strong");
+      detail.textContent = step.example;
+      const note = document.createElement("span");
+      note.className = "tour-example-note";
+      note.textContent = step.note;
+      example.append(label, detail, note);
+      document.getElementById("tour-step-note").textContent = step.foot;
+      document.getElementById("tour-next").textContent = activeTourStep === tourSteps.length - 1 ? "Start again ↻" : "Next step →";
+      document.querySelectorAll("[data-tour-step]").forEach(button => {
+        const active = Number(button.dataset.tourStep) === activeTourStep;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+    document.querySelectorAll("[data-tour-step]").forEach(button => {
+      button.addEventListener("click", () => renderTourStep(Number(button.dataset.tourStep)));
+    });
+    document.getElementById("tour-next").addEventListener("click", () => renderTourStep(activeTourStep + 1));
+    document.getElementById("tour-cta").addEventListener("click", () => {
+      document.getElementById("subscription-panel").scrollIntoView({ behavior:"smooth", block:"center" });
+    });
+    renderTourStep(0);
 
     form.addEventListener("submit", async (event) => {
       // Critical: prevent the browser's normal form submission/reload.
