@@ -27,7 +27,7 @@
     "description": "An AI-assisted business operator that helps build business workspaces, launch assets and organized workflows, with user approval before external actions.",
     "offers": {
       "@type": "Offer",
-      "price": "29",
+      "price": "29.99",
       "priceCurrency": "USD",
       "description": "Monthly subscription"
     }
@@ -151,7 +151,7 @@
     </div>
   </div>
   <p class="muted tour-disclaimer">This is an illustrative product walkthrough, not a customer result or income guarantee. GoSolo prepares work for your review and does not independently spend money, publish content or contact customers.</p>
-  <button class="button" id="tour-cta" type="button">Explore the $29/month workspace</button>
+  <button class="button" id="tour-cta" type="button">Explore the $5 starter access</button>
 </section>
 
 <section class="panel" id="potential-revenue">
@@ -204,7 +204,7 @@
       </div>
     </section>
 
-    <section class="panel" id="subscription-panel"><h2>Unlock your AI business operator</h2><p class="muted">Get the full GoSolo business-building workspace for $29/month. Subscribe once, then build your business and manage its launch work from one dashboard.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Subscribe to GoSolo</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button></section>
+    <section class="panel" id="subscription-panel"><h2>Unlock your AI business operator</h2><p class="muted"><strong>$5 today for your first 30 days.</strong> Then $29.99/month, automatically billed until canceled. Full GoSolo access is included. Cancel anytime before renewal in your billing portal.</p><div id="billing-status" class="status" role="status">Checking subscription status...</div><button class="button" id="subscribe-button" type="button">Start for $5</button><button class="button secondary hidden" id="manage-subscription-button" type="button">Manage subscription</button></section>
     <section class="panel hidden" id="business-builder-panel">
       <h2>Start your business</h2>
       <p class="muted">Describe what you want to build. GOSOLO AI will generate an operator dashboard and a practical first version.</p>
@@ -1222,7 +1222,7 @@ $("acq-export").addEventListener("click", function () {
       const d = await r.json();
       active = !!(r.ok && d.active);
       owner = !!(r.ok && d.owner);
-      status.textContent = owner ? "Owner access verified. Your GoSolo workspace is unlocked." : active ? "Subscription active. Operator tools unlocked." : "No active subscription. Subscribe to unlock your business-building workspace.";
+      status.textContent = owner ? "Owner access verified. Your GoSolo workspace is unlocked." : active ? "Your GoSolo access is active. Operator tools unlocked." : "No active subscription. Start with $5 for 30 days, then $29.99/month.";
       document.getElementById("customer-acquisition")?.classList.toggle("hidden", !active);
       document.getElementById("business-builder-panel")?.classList.toggle("hidden", !active);
       document.getElementById("dashboard")?.classList.toggle("hidden", !active);
@@ -1234,14 +1234,17 @@ $("acq-export").addEventListener("click", function () {
     subscribe.disabled = true;
     status.textContent = "Opening secure Stripe checkout...";
     try {
-      const r = await fetch("/api/billing?action=checkout", {method:"POST"});
+      const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
+      if (!token) throw new Error("Create a GoSolo account or log in before subscribing.");
+      const r = await fetch("/api/billing?action=checkout", {method:"POST", headers: { "Authorization": "Bearer " + token }});
       const d = await r.json();
       if (!r.ok || !d.url) throw new Error(d.error || "Checkout unavailable.");
       location.href = d.url;
     } catch (e) { status.textContent = e.message; subscribe.disabled = false; }
   });
   manage.addEventListener("click", async () => {
-    const r = await fetch("/api/billing?action=portal", {method:"POST"});
+    const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
+    const r = await fetch("/api/billing?action=portal", {method:"POST", headers: token ? { "Authorization": "Bearer " + token } : {}});
     const d = await r.json();
     if (r.ok && d.url) location.href = d.url;
     else status.textContent = d.error || "Billing portal unavailable.";
@@ -1253,7 +1256,8 @@ $("acq-export").addEventListener("click", function () {
     if (p.get("checkout") === "success" && p.get("session_id")) {
       status.textContent = "Confirming your payment...";
       try {
-        const r = await fetch("/api/billing?action=confirm&session_id=" + encodeURIComponent(p.get("session_id")));
+        const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
+        const r = await fetch("/api/billing?action=confirm&session_id=" + encodeURIComponent(p.get("session_id")), { headers: token ? { "Authorization": "Bearer " + token } : {} });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || "Payment confirmation pending.");
         history.replaceState({}, "", "/");
