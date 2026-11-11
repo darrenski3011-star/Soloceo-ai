@@ -6,13 +6,13 @@ const normalizedEmail = value => String(value || "").trim().toLowerCase();
 
 async function requireUser(req) {
   const token = String(req.headers.authorization || "").replace(/^Bearer\\s+/i, "");
-  if (!token) throw new Error("Create a GoSolo account or log in before subscribing.");
+  if (!token) { const error = new Error("Create a GoSolo account or log in before subscribing."); error.status = 401; throw error; }
   if (!supabaseBase() || !supabaseAnon()) throw new Error("GoSolo account verification is not configured.");
   const response = await fetch(supabaseBase() + "/auth/v1/user", {
     headers: { apikey: supabaseAnon(), Authorization: "Bearer " + token }
   });
   const user = await response.json().catch(() => ({}));
-  if (!response.ok || !user.id || !user.email) throw new Error("Your GoSolo login expired. Log in again.");
+  if (!response.ok || !user.id || !user.email) { const error = new Error("Your GoSolo login expired. Log in again."); error.status = 401; throw error; }
   return user;
 }
 
@@ -128,6 +128,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Unsupported billing action." });
   } catch (error) {
     console.error("GoSolo billing error:", error);
-    return res.status(500).json({ error: error.message || "Billing service unavailable." });
+    return res.status(error.status || 500).json({ error: error.message || "Billing service unavailable." });
   }
 }
