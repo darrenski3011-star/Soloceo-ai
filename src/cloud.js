@@ -119,8 +119,12 @@ if (!panel || !status || !authForm || !signedIn) {
       if (data.access_token && data.user) {
         saveSession(data);
         showUser(data.user);
-        await syncProspects();
-      await syncOperator();
+        try {
+          await syncProspects();
+          await syncOperator();
+        } catch (syncError) {
+          status.textContent = "Account created and signed in, but cloud sync needs attention: " + (syncError.message || "Please retry Sync my prospects.");
+        }
       } else {
         status.textContent = "Account created. Check your email for the confirmation link, then return here and log in.";
       }
@@ -144,8 +148,12 @@ if (!panel || !status || !authForm || !signedIn) {
       const data = await authRequest("token?grant_type=password", { email, password });
       saveSession(data);
       showUser(data.user);
-      await syncProspects();
-      await syncOperator();
+      try {
+        await syncProspects();
+        await syncOperator();
+      } catch (syncError) {
+        status.textContent = "Signed in successfully, but cloud sync needs attention: " + (syncError.message || "Use Sync my prospects to retry.");
+      }
     } catch (error) {
       status.textContent = error.message || "Login failed.";
     } finally {
@@ -274,28 +282,32 @@ if (!panel || !status || !authForm || !signedIn) {
   });
 
   async function restoreSession() {
+    const saved = JSON.parse(localStorage.getItem(sessionKey) || "null");
+    if (!saved?.refresh_token) {
+      showUser(null);
+      status.textContent = "Account service ready. Enter your email and password to create an account.";
+      return;
+    }
+    session = saved;
     try {
-      const saved = JSON.parse(localStorage.getItem(sessionKey) || "null");
-      if (!saved?.refresh_token) {
-        showUser(null);
-        status.textContent = "Account service ready. Enter your email and password to create an account.";
-        return;
-      }
-      session = saved;
       if (Number(session.expires_at || 0) * 1000 < Date.now() + 60000) {
         await refreshSession();
       }
-      if (session?.access_token && session?.user) {
-        showUser(session.user);
-        await syncProspects();
-      await syncOperator();
-      } else {
-        showUser(null);
+      if (!session?.access_token || !session?.user) {
+        throw new Error("Your session is incomplete. Log in again.");
       }
     } catch (error) {
       status.textContent = "Could not restore your account session. Log in again. " + (error.message || "");
       saveSession(null);
       showUser(null);
+      return;
+    }
+    showUser(session.user);
+    try {
+      await syncProspects();
+      await syncOperator();
+    } catch (error) {
+      status.textContent = "Signed in, but cloud sync needs attention: " + (error.message || "Use Sync my prospects to retry.");
     }
   }
 
