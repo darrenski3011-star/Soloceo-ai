@@ -166,13 +166,22 @@ if (!panel || !status || !authForm || !signedIn) {
     const token = await validAccessToken();
     const userId = session?.user?.id;
     if (!userId) throw new Error("Your account session is incomplete. Log out and log in again.");
-    const local = JSON.parse(localStorage.getItem(operatorStorageKey) || "null");
-    const path = "/rest/v1/user_data?select=data&data_key=eq.operator&user_id=eq." + encodeURIComponent(userId);
+    let local = null;
+    try {
+      local = JSON.parse(localStorage.getItem(operatorStorageKey) || "null");
+    } catch (_) {}
+    const path = "/rest/v1/user_data?select=data,updated_at&data_key=eq.operator&user_id=eq." + encodeURIComponent(userId);
     const read = await request(path, {}, token);
-    const cloudOperator = read?.[0]?.data || null;
-    const operator = local || cloudOperator;
+    const cloudRow = read?.[0] || null;
+    const cloudOperator = cloudRow?.data || null;
+    const localUpdatedAt = Date.parse(local?._gosoloUpdatedAt || "") || 0;
+    const cloudUpdatedAt = Date.parse(cloudRow?.updated_at || "") || 0;
+    // Cloud wins for legacy/untimestamped local copies. Only a deliberately
+    // newer local edit may replace the saved cloud workspace.
+    const localIsNewer = !!local && (!cloudOperator || localUpdatedAt > cloudUpdatedAt);
+    const operator = localIsNewer ? local : cloudOperator;
     if (!operator) return;
-    if (local) {
+    if (localIsNewer) {
       await request("/rest/v1/user_data?on_conflict=user_id,data_key", {
         method: "POST",
         headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
