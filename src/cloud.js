@@ -268,6 +268,11 @@ if (!panel || !status || !authForm || !signedIn) {
     }
   });
 
+  window.addEventListener("gosolo:session-updated", event => {
+    const next = event.detail?.session;
+    if (next?.access_token && next?.refresh_token) session = next;
+  });
+
   const originalSetItem = Storage.prototype.setItem;
   Storage.prototype.setItem = function(key, value) {
     originalSetItem.call(this, key, value);
