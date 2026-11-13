@@ -24,6 +24,7 @@ if (panel) {
       const next = await response.json();
       if (!response.ok || !next.access_token) throw new Error("Your GoSolo login expired. Log in again.");
       localStorage.setItem(sessionKey, JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent("gosolo:session-updated", { detail: { session: next } }));
       session = next;
     }
     return session.access_token;
