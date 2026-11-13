@@ -118,7 +118,7 @@ if (panel) {
 
   const billing = $("billing-status");
   function syncVisibility() {
-    const active = /Subscription active/i.test(billing?.textContent || "");
+    const active = /access is active|owner access verified/i.test(billing?.textContent || "");
     panel.classList.toggle("hidden", !active);
     if (active && !panel.dataset.checked) {
       panel.dataset.checked = "1";
