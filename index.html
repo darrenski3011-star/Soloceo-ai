@@ -372,6 +372,7 @@
 
     function persistOperator() {
       if (!latestOperator) return;
+      latestOperator._gosoloUpdatedAt = new Date().toISOString();
       try { localStorage.setItem("gosolo_ai_operator_v1", JSON.stringify(latestOperator)); }
       catch (error) { console.warn("Could not save the business workspace on this device:", error); }
       window.dispatchEvent(new CustomEvent("gosolo:operator-updated", { detail: { operator: latestOperator } }));
