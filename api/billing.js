@@ -5,7 +5,7 @@ const supabaseAnon = () => process.env.SUPABASE_ANON_KEY || process.env.VITE_SUP
 const normalizedEmail = value => String(value || "").trim().toLowerCase();
 
 async function requireUser(req) {
-  const token = String(req.headers.authorization || "").replace(/^Bearer\\s+/i, "");
+  const token = String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
   if (!token) { const error = new Error("Create a GoSolo account or log in before subscribing."); error.status = 401; throw error; }
   if (!supabaseBase() || !supabaseAnon()) throw new Error("GoSolo account verification is not configured.");
   const response = await fetch(supabaseBase() + "/auth/v1/user", {
