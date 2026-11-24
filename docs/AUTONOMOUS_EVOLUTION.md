@@ -2,16 +2,16 @@
 
 ## First milestone: read-only self-review
 
-The first release adds `POST /api/evolution`. It is restricted to the verified GoSolo owner account and reviews a fixed allowlist of application source files from the deployed build.
+The first release adds an `evolution-review` action to the existing `POST /api/operator` endpoint, avoiding an additional Vercel Serverless Function on the Hobby plan. It is restricted to the verified GoSolo owner account and reviews a fixed allowlist of application source files from the deployed build.
 
 The review combines deterministic checks with an LLM review. It returns findings, risk levels, proposed change descriptions, and required tests. It does not accept arbitrary filesystem paths, expose environment-variable values, edit files, run generated code, change billing rules, or deploy.
 
 ## Request
 
-Send an authenticated POST request with a valid Supabase bearer token:
+Send an authenticated POST request to `/api/operator` with a valid Supabase bearer token:
 
 ```json
-{ "action": "review" }
+{ "action": "evolution-review" }
 ```
 
 The endpoint uses the existing `GEMINI_API_KEY` and optional `GEMINI_MODEL` Vercel environment variables. The current default model matches the existing GoSolo build endpoint.
