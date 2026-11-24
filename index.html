@@ -293,6 +293,13 @@
         <h3>Latest operator activity</h3>
         <div id="operator-activity"><p class="muted">No background work has run yet.</p></div>
       </div>
+      <section class="panel" id="evolution-lab-panel" aria-labelledby="evolution-lab-title">
+        <h2 id="evolution-lab-title">GoSolo Evolution Lab</h2>
+        <p class="muted">Run a read-only review of GoSolo's application code. The AI can identify weaknesses and recommend improvements, but this first release cannot edit code, run generated code, or deploy changes.</p>
+        <button class="button" id="evolution-review-button" type="button">Run Self-Analysis</button>
+        <p class="status" id="evolution-review-status" role="status" aria-live="polite">Evolution review has not been run.</p>
+        <div id="evolution-review-results" aria-live="polite"></div>
+      </section>
     </section>
 
     <section class="panel hidden" id="gosolo-gmail-panel">
@@ -1268,6 +1275,77 @@ $("acq-export").addEventListener("click", function () {
   })();
 })();
 </script>
+
+<script>
+(() => {
+  const panel = document.getElementById("evolution-lab-panel");
+  const button = document.getElementById("evolution-review-button");
+  const status = document.getElementById("evolution-review-status");
+  const results = document.getElementById("evolution-review-results");
+  if (!panel || !button || !status || !results) return;
+  const token = () => {
+    try { return JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || ""; }
+    catch (_) { return ""; }
+  };
+  function addText(parent, tag, value, className) {
+    const node = document.createElement(tag);
+    node.textContent = String(value ?? "");
+    if (className) node.className = className;
+    parent.appendChild(node);
+    return node;
+  }
+  function renderReview(data) {
+    results.replaceChildren();
+    const review = data.review || {};
+    addText(results, "h3", "Review summary");
+    addText(results, "p", review.summary || "No summary returned.");
+    addText(results, "p", "Overall risk: " + String(review.overallRisk || "unknown").toUpperCase(), "status");
+    addText(results, "h3", "Findings (" + (review.findings || []).length + ")");
+    if (!Array.isArray(review.findings) || review.findings.length === 0) addText(results, "p", "No findings were returned.");
+    else review.findings.forEach(item => {
+      const card = document.createElement("article"); card.className = "item";
+      addText(card, "h3", "[" + String(item.severity || "info").toUpperCase() + "] " + (item.title || "Finding"));
+      addText(card, "p", item.evidence || "No evidence supplied.");
+      addText(card, "p", "Impact: " + (item.impact || "Not specified."));
+      addText(card, "p", "Recommendation: " + (item.recommendation || "Not specified."));
+      results.appendChild(card);
+    });
+    addText(results, "h3", "Proposed improvements (" + (review.proposedChanges || []).length + ")");
+    if (!Array.isArray(review.proposedChanges) || review.proposedChanges.length === 0) addText(results, "p", "No code changes were proposed.");
+    else review.proposedChanges.forEach(item => {
+      const card = document.createElement("article"); card.className = "item";
+      addText(card, "h3", item.file || "Proposed change");
+      addText(card, "p", item.purpose || "");
+      addText(card, "p", item.changeDescription || "");
+      addText(card, "p", "Risk: " + (item.risk || "unspecified"));
+      results.appendChild(card);
+    });
+    addText(results, "p", "Files reviewed: " + (data.filesReviewed || []).join(", "), "muted");
+    addText(results, "p", data.notice || "Read-only review. No code was changed.", "muted");
+  }
+  button.addEventListener("click", async () => {
+    const accessToken = token();
+    if (!accessToken) { status.textContent = "Log in to the GoSolo owner account before running an evolution review."; return; }
+    button.disabled = true; button.textContent = "Analyzing source code...";
+    status.textContent = "Reviewing approved source files. This can take up to 45 seconds.";
+    results.replaceChildren();
+    try {
+      const response = await fetch("/api/operator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + accessToken },
+        body: JSON.stringify({ action: "evolution-review" })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 403) { panel.hidden = true; throw new Error("The Evolution Lab is restricted to the verified GoSolo owner account."); }
+      if (!response.ok || !data.success) throw new Error(data.error || "The review could not be completed.");
+      renderReview(data);
+      status.textContent = "Review completed at " + new Date(data.reviewedAt).toLocaleString() + ". No code was changed.";
+    } catch (error) { status.textContent = error.message || "Evolution review failed. Try again later."; }
+    finally { button.disabled = false; button.textContent = "Run Self-Analysis"; }
+  });
+})();
+</script>
+
   <script type="module" src="/src/cloud.js"></script>
   <script type="module" src="/src/gmail.js"></script>
   <script type="module" src="/src/warriorplus.js"></script>
