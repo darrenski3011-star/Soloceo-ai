@@ -1234,6 +1234,8 @@ $("acq-export").addEventListener("click", function () {
     document.getElementById("gosolo-email").focus({ preventScroll: true });
   }
 
+  window.addEventListener("gosolo:session-changed", () => { refresh(); });
+
   async function refresh() {
     try {
       const token = await accessToken();
