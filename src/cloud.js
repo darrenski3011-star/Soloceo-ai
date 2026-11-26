@@ -54,7 +54,8 @@ if (!panel || !status || !authForm || !signedIn) {
     $("gosolo-user").textContent = active ? "Signed in as " + user.email : "";
     status.textContent = active
       ? "Signed in. Your prospects sync to your account when you save them."
-      : "Create an account or log in to save your GoSolo workspace.";
+: "Create an account or log in to save your GoSolo workspace.";
+    window.dispatchEvent(new CustomEvent("gosolo:session-changed", { detail: { signedIn: active } }));
   }
 
   function setBusy(button, busy, label) {
