@@ -195,6 +195,7 @@
         <div class="account-row">
           <button id="gosolo-signup" type="button">Create account</button>
           <button id="gosolo-login" class="secondary" type="button">Log in</button>
+          <button id="gosolo-resend-confirmation" class="secondary" type="button">Resend confirmation email</button>
         </div>
       </div>
       <div id="gosolo-signed-in" hidden>
@@ -1213,57 +1214,101 @@ $("acq-export").addEventListener("click", function () {
   document.getElementById("dashboard").after(document.getElementById("subscription-panel"));
   const subscribe = document.getElementById("subscribe-button");
   const manage = document.getElementById("manage-subscription-button");
+  const account = document.getElementById("gosolo-account");
+  const lockedPreview = document.getElementById("locked-plan-preview");
   let active = false;
   let owner = false;
+
+  async function accessToken() {
+    if (typeof window.gosoloGetAccessToken === "function") {
+      try { return await window.gosoloGetAccessToken(); }
+      catch (_) { return ""; }
+    }
+    return "";
+  }
+
+  function promptForAccount() {
+    account.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("gosolo-account-status").textContent =
+      "Create a GoSolo account or log in before subscribing. Your account keeps your workspace and subscription linked.";
+    document.getElementById("gosolo-email").focus({ preventScroll: true });
+  }
+
   async function refresh() {
     try {
-      const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
+      const token = await accessToken();
       const r = await fetch("/api/billing?action=status", { headers: token ? { "Authorization": "Bearer " + token } : {} });
       const d = await r.json();
       active = !!(r.ok && d.active);
       owner = !!(r.ok && d.owner);
-      status.textContent = owner ? "Owner access verified. Your GoSolo workspace is unlocked." : active ? "Your GoSolo access is active. Operator tools unlocked." : "No active subscription. Start with $5 for 30 days, then $29.99/month.";
+      status.textContent = owner
+        ? "Owner access verified. Your workspace is unlocked. Subscription checkout remains available for testing."
+        : active
+          ? "Your GoSolo access is active. Operator tools unlocked."
+          : "No active subscription. Start with $5 today, then $29.99/month.";
       document.getElementById("customer-acquisition")?.classList.toggle("hidden", !active);
       document.getElementById("business-builder-panel")?.classList.toggle("hidden", !active);
       document.getElementById("dashboard")?.classList.toggle("hidden", !active);
-      subscribe.classList.toggle("hidden", active);
+      subscribe.classList.toggle("hidden", active && !owner);
       manage.classList.toggle("hidden", !active || owner);
-    } catch { status.textContent = "Unable to check subscription. Refresh and try again."; }
+      lockedPreview.classList.toggle("hidden", active);
+    } catch {
+      status.textContent = "Unable to check subscription. Refresh and try again.";
+    }
   }
+
   subscribe.addEventListener("click", async () => {
     subscribe.disabled = true;
-    status.textContent = "Opening secure Stripe checkout...";
     try {
-      const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
-      if (!token) throw new Error("Create a GoSolo account or log in before subscribing.");
-      const r = await fetch("/api/billing?action=checkout", {method:"POST", headers: { "Authorization": "Bearer " + token }});
+      const token = await accessToken();
+      if (!token) {
+        status.textContent = "Create a GoSolo account or log in before subscribing.";
+        promptForAccount();
+        subscribe.disabled = false;
+        return;
+      }
+      status.textContent = "Opening secure Stripe checkout...";
+      const r = await fetch("/api/billing?action=checkout", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token }
+      });
       const d = await r.json();
       if (!r.ok || !d.url) throw new Error(d.error || "Checkout unavailable.");
       location.href = d.url;
-    } catch (e) { status.textContent = e.message; subscribe.disabled = false; }
-  });
-  manage.addEventListener("click", async () => {
-    const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
-    const r = await fetch("/api/billing?action=portal", {method:"POST", headers: token ? { "Authorization": "Bearer " + token } : {}});
-    const d = await r.json();
-    if (r.ok && d.url) location.href = d.url;
-    else status.textContent = d.error || "Billing portal unavailable.";
+    } catch (e) {
+      status.textContent = e.message || "Checkout unavailable. Log in again and retry.";
+      subscribe.disabled = false;
+    }
   });
 
+  manage.addEventListener("click", async () => {
+    try {
+      const token = await accessToken();
+      if (!token) throw new Error("Log in again before opening billing management.");
+      const r = await fetch("/api/billing?action=portal", { method: "POST", headers: { "Authorization": "Bearer " + token } });
+      const d = await r.json();
+      if (r.ok && d.url) location.href = d.url;
+      else throw new Error(d.error || "Billing portal unavailable.");
+    } catch (e) { status.textContent = e.message || "Billing portal unavailable."; }
+  });
 
   (async () => {
     const p = new URLSearchParams(location.search);
     if (p.get("checkout") === "success" && p.get("session_id")) {
       status.textContent = "Confirming your payment...";
       try {
-        const token = JSON.parse(localStorage.getItem("gosolo_supabase_session_v1") || "null")?.access_token || "";
-        const r = await fetch("/api/billing?action=confirm&session_id=" + encodeURIComponent(p.get("session_id")), { headers: token ? { "Authorization": "Bearer " + token } : {} });
+        const token = await accessToken();
+        if (!token) throw new Error("Log in with the account used at checkout to confirm your subscription.");
+        const r = await fetch("/api/billing?action=confirm&session_id=" + encodeURIComponent(p.get("session_id")), { headers: { "Authorization": "Bearer " + token } });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || "Payment confirmation pending.");
         history.replaceState({}, "", "/");
       } catch (e) { status.textContent = e.message; }
     }
-    if (p.get("checkout") === "cancelled") { history.replaceState({}, "", "/"); status.textContent = "Checkout cancelled. No subscription was started."; }
+    if (p.get("checkout") === "cancelled") {
+      history.replaceState({}, "", "/");
+      status.textContent = "Checkout cancelled. No subscription was started.";
+    }
     await refresh();
   })();
 })();
