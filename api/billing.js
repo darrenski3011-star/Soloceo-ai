@@ -30,42 +30,38 @@ export default async function handler(req, res) {
   try {
     if (action === "checkout" && req.method === "POST") {
       const user = await requireUser(req);
-      const premiumPriceId = String(process.env.STRIPE_PRICE_ID || "").trim();
-      const introPriceId = String(process.env.STRIPE_INTRO_PRICE_ID || "").trim();
-      if (!/^price_[A-Za-z0-9]+$/.test(premiumPriceId) || !/^price_[A-Za-z0-9]+$/.test(introPriceId)) {
-        throw new Error("GoSolo introductory and Premium prices are not configured correctly.");
+      const monthlyPriceId = String(process.env.STRIPE_PRICE_ID || "").trim();
+      const introCouponId = String(process.env.STRIPE_INTRO_COUPON_ID || "").trim();
+      if (monthlyPriceId !== "price_1Uezma2RG6SNDPSAw5x50cdS" || !/^price_[A-Za-z0-9]+$/.test(monthlyPriceId)) {
+        throw new Error("GoSolo's canonical $29.99 monthly Stripe price is not configured in STRIPE_PRICE_ID.");
+      }
+      if (introCouponId !== "qRKwI8OU" || !/^[A-Za-z0-9]+$/.test(introCouponId)) {
+        throw new Error("GoSolo's existing $24.99 introductory coupon is not configured in STRIPE_INTRO_COUPON_ID.");
       }
       if (!process.env.APP_SESSION_SECRET) throw new Error("APP_SESSION_SECRET is missing in Vercel.");
 
-      const [premiumPrice, introPrice] = await Promise.all([
-        stripeRequest("prices/" + encodeURIComponent(premiumPriceId)),
-        stripeRequest("prices/" + encodeURIComponent(introPriceId))
+      const [monthlyPrice, introCoupon] = await Promise.all([
+        stripeRequest("prices/" + encodeURIComponent(monthlyPriceId)),
+        stripeRequest("coupons/" + encodeURIComponent(introCouponId))
       ]);
-      if (!premiumPrice.active || premiumPrice.type !== "recurring" || premiumPrice.recurring?.interval !== "month" || premiumPrice.unit_amount !== 2999) {
-        throw new Error("The GoSolo Premium price must be active at $29.99 per month.");
+      if (!monthlyPrice.active || monthlyPrice.type !== "recurring" || monthlyPrice.recurring?.interval !== "month" || monthlyPrice.unit_amount !== 2999 || monthlyPrice.currency !== "usd" || monthlyPrice.product !== "prod_VXpyzV5dwa471p") {
+        throw new Error("The canonical GoSolo Stripe price must be active at $29.99 USD per month on GoSolo AI Monthly.");
       }
-      if (!introPrice.active || introPrice.type !== "one_time" || introPrice.unit_amount !== 500 || introPrice.currency !== "usd") {
-        throw new Error("The GoSolo introductory price must be active at $5.00 one time.");
-      }
-      if (premiumPrice.product !== introPrice.product) {
-        throw new Error("GoSolo introductory and Premium prices must belong to the same product.");
+      if (!introCoupon.valid || introCoupon.amount_off !== 2499 || introCoupon.duration !== "once" || introCoupon.currency !== "usd") {
+        throw new Error("The existing GoSolo introductory coupon must be valid, $24.99 off, once, in USD.");
       }
 
       const origin = "https://" + (req.headers["x-forwarded-host"] || req.headers.host);
       const params = new URLSearchParams();
       params.set("mode", "subscription");
-      params.set("line_items[0][price]", premiumPriceId);
+      params.set("line_items[0][price]", monthlyPriceId);
       params.set("line_items[0][quantity]", "1");
-      params.set("line_items[1][price]", introPriceId);
-      params.set("line_items[1][quantity]", "1");
+      params.set("discounts[0][coupon]", introCouponId);
       params.set("client_reference_id", user.id);
       params.set("customer_email", user.email);
       params.set("success_url", origin + "/?checkout=success&session_id={CHECKOUT_SESSION_ID}");
       params.set("cancel_url", origin + "/?checkout=cancelled");
       params.set("billing_address_collection", "auto");
-      params.set("allow_promotion_codes", "true");
-      params.set("subscription_data[trial_period_days]", "30");
-      params.set("subscription_data[trial_settings][end_behavior][missing_payment_method]", "cancel");
       params.set("subscription_data[metadata][product]", "gosolo_ai");
       params.set("subscription_data[metadata][supabase_user_id]", user.id);
 
