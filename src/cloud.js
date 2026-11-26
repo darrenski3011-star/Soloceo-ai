@@ -100,6 +100,9 @@ if (!panel || !status || !authForm || !signedIn) {
     return session.access_token;
   }
 
+  // Share the refreshed session with page modules such as billing.
+  window.gosoloGetAccessToken = validAccessToken;
+
   async function authRequest(path, body) {
     return request("/auth/v1/" + path, { method: "POST", body: JSON.stringify(body) });
   }
@@ -131,6 +134,24 @@ if (!panel || !status || !authForm || !signedIn) {
     }
   });
 
+  const resendButton = $("gosolo-resend-confirmation");
+  if (resendButton) resendButton.addEventListener("click", async () => {
+    const email = $("gosolo-email").value.trim();
+    if (!email) {
+      status.textContent = "Enter your email address first, then request a new confirmation link.";
+      return;
+    }
+    setBusy(resendButton, true, "Sending confirmation...");
+    try {
+      await authRequest("resend", { type: "signup", email });
+      status.textContent = "If this address has a pending GoSolo signup, Supabase has been asked to send a new confirmation email. Check your inbox and spam folder.";
+    } catch (error) {
+      status.textContent = error.message || "Could not resend the confirmation email.";
+    } finally {
+      setBusy(resendButton, false);
+    }
+  });
+
   $("gosolo-login").addEventListener("click", async () => {
     const button = $("gosolo-login");
     const email = $("gosolo-email").value.trim();
@@ -147,7 +168,10 @@ if (!panel || !status || !authForm || !signedIn) {
       await syncProspects();
       await syncOperator();
     } catch (error) {
-      status.textContent = error.message || "Login failed.";
+      const message = error.message || "Login failed.";
+      status.textContent = /email not confirmed/i.test(message)
+        ? "Email not confirmed. Open the confirmation link we emailed you, or select Resend confirmation email below."
+        : message;
     } finally {
       setBusy(button, false);
     }
